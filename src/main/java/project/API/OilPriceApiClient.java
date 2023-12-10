@@ -23,12 +23,6 @@ public class OilPriceApiClient {
         try {
             HttpResponse<String> response = sendHttpRequest();
             if (response.statusCode() == 200) {
-                Map<String, String> oilPrices = parseAndExtractOilPrice(response.body());
-                for (Map.Entry<String, String> entry : oilPrices.entrySet()) {
-                    String period = entry.getKey();
-                    String value = entry.getValue();
-                    System.out.println("Date: " + period + ", Value: " + value);
-                }
                 return parseAndExtractOilPrice(response.body());
             } else
                 throw new APIStatusException("Failed to fetch oil prices. HTTP Status Code: " + response.statusCode());
