@@ -6,6 +6,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,8 +20,9 @@ public class CurrencyExchangeApiClient {
     private static final String API_ACCESS_KEY = "7937cfd1f93a65a5865c4ebe9fe6aad7";
 
     private static final String targetCurrency = "USD,PLN";
-    private static LocalDate APIDate = LocalDate.of(1999, 5, 1);
+    private static LocalDate APIDate = LocalDate.of(1999, 2, 1);
     private static LocalDate currentDate = LocalDate.now();
+    private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM");
 
     public static Map<String, String> fetchExchangeRate() throws APIStatusException {
         HttpResponse<String> response;
@@ -29,8 +31,8 @@ public class CurrencyExchangeApiClient {
             while (APIDate.isBefore(currentDate) || APIDate.isEqual(currentDate)) {
                 response = sendHttpRequest();
                 if (response.statusCode() == 200) {
-                    exchangeRate.put(APIDate.toString(), parseAndExtractExchangeRate(response.body()));
-                    System.out.println(APIDate + ": " + exchangeRate.get(APIDate.toString()));
+                    String formattedDate = APIDate.format(formatter);
+                    exchangeRate.put(formattedDate, parseAndExtractExchangeRate(response.body()));
                 } else
                     throw new APIStatusException(
                             "Failed to fetch exchange prices. HTTP Status Code: " + response.statusCode());

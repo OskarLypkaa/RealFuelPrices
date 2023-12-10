@@ -1,21 +1,29 @@
 package project;
 
+import java.util.Map;
+
 import project.API.CurrencyExchangeApiClient;
 import project.API.OilPriceApiClient;
+import project.analysis.OilPriceAnalyzer;
 import project.exceptions.APIStatusException;
 
 public class Main {
-    public Main() {
-    }
-
     public static void main(String[] args) throws APIStatusException {
 
-        OilPriceApiClient oilPrice = new OilPriceApiClient();
+        OilPriceAnalyzer oilPriceInPLN = new OilPriceAnalyzer(OilPriceApiClient.fetchOilPriceInUSD(),
+                CurrencyExchangeApiClient.fetchExchangeRate());
 
-        // oilPrice.fetchOilPriceInUSD();
+        Map<String, String> analiseResult = oilPriceInPLN.analyzedOilPricesInPLN();
 
-        CurrencyExchangeApiClient currencyExchange = new CurrencyExchangeApiClient();
+        try {
+            for (String date : analiseResult.keySet()) {
+                System.out.println("Wartość bartyłki ropy w " + date + ": " + analiseResult.get(date) + "PLN");
+                Thread.sleep(1000);
+            }
 
-        currencyExchange.fetchExchangeRate();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
     }
 }
