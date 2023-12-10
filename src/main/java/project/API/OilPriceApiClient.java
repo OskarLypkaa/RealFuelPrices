@@ -19,13 +19,20 @@ public class OilPriceApiClient {
     private static final String API_TOKEN = "?api_key=1hU4hrUQ8qs1uR4L9UScdgCAqhDLNRBAmg9cchbv";
     private static final String API_PARAMETERS = "&frequency=monthly&data[0]=value&facets[series][]=RBRTE&start=1999-02&sort[0][column]=period&sort[0][direction]=desc&offset=0&length=5000";
 
+    // Method to fetch oil prices in USD from the API
     public static Map<String, String> fetchOilPriceInUSD() throws APIStatusException {
         try {
+            // Send HTTP request to the API
             HttpResponse<String> response = sendHttpRequest();
+
+            // Check if the HTTP response status code is 200 (OK)
             if (response.statusCode() == 200) {
+                // Parse and extract oil prices from the response
                 return parseAndExtractOilPrice(response.body());
-            } else
+            } else {
+                // Throw an exception for non-OK status codes
                 throw new APIStatusException("Failed to fetch oil prices. HTTP Status Code: " + response.statusCode());
+            }
 
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
@@ -33,6 +40,7 @@ public class OilPriceApiClient {
         }
     }
 
+    // Method to send HTTP request to the API
     private static HttpResponse<String> sendHttpRequest() throws IOException, InterruptedException {
         HttpClient httpClient = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
@@ -42,6 +50,7 @@ public class OilPriceApiClient {
         return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
     }
 
+    // Method to parse and extract oil prices from JSON response
     private static Map<String, String> parseAndExtractOilPrice(String responseBody) {
         Map<String, String> result = new LinkedHashMap<>();
 
@@ -85,5 +94,4 @@ public class OilPriceApiClient {
 
         return result;
     }
-
 }

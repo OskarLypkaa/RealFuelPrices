@@ -7,37 +7,45 @@ public class OilPriceAnalyzer {
     private Map<String, String> oilPricesInUSD;
     private Map<String, String> exchangeRates;
 
+    // Constructor to initialize the class with oil prices in USD and exchange rates
     public OilPriceAnalyzer(Map<String, String> oilPricesInUSD, Map<String, String> exchangeRates) {
         this.oilPricesInUSD = oilPricesInUSD;
         this.exchangeRates = exchangeRates;
     }
 
+    // Analyze oil prices in PLN based on USD prices and exchange rates
     public Map<String, String> analyzedOilPricesInPLN() {
         Map<String, String> analyzedResults = new LinkedHashMap<>();
 
+        // Iterate through each date in the oilPricesInUSD map
         for (String date : oilPricesInUSD.keySet()) {
+            // Extract oil price in USD and corresponding exchange rate info
             double oilPriceInUSD = Double.parseDouble(oilPricesInUSD.get(date));
             String exchangeRateInfo = exchangeRates.get(date);
 
+            // Calculate oil price in PLN based on the exchange rate
             double exchangeRatePLN = extractExchangeRatePLN(exchangeRateInfo);
             double oilPriceInPLN = oilPriceInUSD * exchangeRatePLN;
 
+            // Format the result and add it to the analyzedResults map
             analyzedResults.put(date, String.format("%.2f", oilPriceInPLN));
         }
         return analyzedResults;
     }
 
-    private Double extractExchangeRatePLN(String exchangeRateInfo) {
+    // Extracts the exchange rate in PLN from the given exchange rate information
+    private double extractExchangeRatePLN(String exchangeRateInfo) {
         String[] parts = exchangeRateInfo.split(" ");
         if (parts.length == 2) {
             try {
-                Double USD = Double.parseDouble(parts[0].replace(",", "."));
-                Double PLN = Double.parseDouble(parts[1].replace(",", "."));
+                // Parse USD and PLN values and calculate the exchange rate
+                double USD = Double.parseDouble(parts[0].replace(",", "."));
+                double PLN = Double.parseDouble(parts[1].replace(",", "."));
                 return PLN / USD;
             } catch (NumberFormatException e) {
-                e.printStackTrace();
+                e.printStackTrace(); // Consider logging the exception instead of printing the stack trace.
             }
         }
-        return 1.0;
+        return 1.0; // Default to 1.0 if the format is incorrect
     }
 }
