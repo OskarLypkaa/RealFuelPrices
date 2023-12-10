@@ -1,4 +1,3 @@
 # .gitignore
 
-# Ignoruj katalog target
 target/
