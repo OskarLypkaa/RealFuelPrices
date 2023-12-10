@@ -19,10 +19,10 @@ public class CurrencyExchangeApiClient {
     private static final String API_ACCESS_KEY = "7937cfd1f93a65a5865c4ebe9fe6aad7";
 
     private static final String targetCurrency = "USD,PLN";
-    private LocalDate APIDate = LocalDate.of(1999, 5, 1);
-    private LocalDate currentDate = LocalDate.now();
+    private static LocalDate APIDate = LocalDate.of(1999, 5, 1);
+    private static LocalDate currentDate = LocalDate.now();
 
-    public Map<String, String> fetchExchangeRate() throws APIStatusException {
+    public static Map<String, String> fetchExchangeRate() throws APIStatusException {
         HttpResponse<String> response;
         Map<String, String> exchangeRate = new HashMap<>();
         try {
@@ -43,7 +43,7 @@ public class CurrencyExchangeApiClient {
         }
     }
 
-    private HttpResponse<String> sendHttpRequest()
+    private static HttpResponse<String> sendHttpRequest()
             throws IOException, InterruptedException {
         String urlWithParams = String.format("%s%s?access_key=%s&symbols=%s",
                 API_URL, APIDate, API_ACCESS_KEY, targetCurrency);
@@ -56,7 +56,7 @@ public class CurrencyExchangeApiClient {
         return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
     }
 
-    private String parseAndExtractExchangeRate(String responseBody) {
+    private static String parseAndExtractExchangeRate(String responseBody) {
         String result = new String();
         try {
             // Parse the JSON response

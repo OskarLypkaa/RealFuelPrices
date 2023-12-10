@@ -19,7 +19,7 @@ public class OilPriceApiClient {
     private static final String API_TOKEN = "?api_key=1hU4hrUQ8qs1uR4L9UScdgCAqhDLNRBAmg9cchbv";
     private static final String API_PARAMETERS = "&frequency=monthly&data[0]=value&facets[series][]=RBRTE&start=1999-02&sort[0][column]=period&sort[0][direction]=desc&offset=0&length=5000";
 
-    public Map<String, String> fetchOilPriceInUSD() throws APIStatusException {
+    public static Map<String, String> fetchOilPriceInUSD() throws APIStatusException {
         try {
             HttpResponse<String> response = sendHttpRequest();
             if (response.statusCode() == 200) {
@@ -39,7 +39,7 @@ public class OilPriceApiClient {
         }
     }
 
-    private HttpResponse<String> sendHttpRequest() throws IOException, InterruptedException {
+    private static HttpResponse<String> sendHttpRequest() throws IOException, InterruptedException {
         HttpClient httpClient = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(API_URL + API_TOKEN + API_PARAMETERS))
@@ -48,7 +48,7 @@ public class OilPriceApiClient {
         return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
     }
 
-    private Map<String, String> parseAndExtractOilPrice(String responseBody) {
+    private static Map<String, String> parseAndExtractOilPrice(String responseBody) {
         Map<String, String> result = new LinkedHashMap<>();
 
         try {
