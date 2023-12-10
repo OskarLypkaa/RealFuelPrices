@@ -11,6 +11,7 @@ public class OilPriceAnalyzer {
     public OilPriceAnalyzer(Map<String, String> oilPricesInUSD, Map<String, String> exchangeRates) {
         this.oilPricesInUSD = oilPricesInUSD;
         this.exchangeRates = exchangeRates;
+
     }
 
     // Analyze oil prices in PLN based on USD prices and exchange rates
@@ -47,5 +48,23 @@ public class OilPriceAnalyzer {
             }
         }
         return 1.0; // Default to 1.0 if the format is incorrect
+    }
+
+    public void printData(Map<String, String> fuelPricesInPLN) {
+        Map<String, String> analiseResult = analyzedOilPricesInPLN();
+
+        try {
+            for (String date : analiseResult.keySet()) {
+                String valueString = fuelPricesInPLN.get(date);
+                Double value = Double.valueOf(valueString);
+                value = value / 1000;
+                System.out.println("Wartość bartyłki ropy w " + date + ": " +
+                        analiseResult.get(date) + "PLN  " + String.format("%.2f", value) + "PLN/L");
+                Thread.sleep(500);
+            }
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }
