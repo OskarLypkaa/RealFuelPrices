@@ -17,7 +17,7 @@ import java.util.Map;
 public class OilPriceApiClient {
     private static final String API_URL = "https://api.eia.gov/v2/petroleum/pri/spt/data/";
     private static final String API_TOKEN = "?api_key=1hU4hrUQ8qs1uR4L9UScdgCAqhDLNRBAmg9cchbv";
-    private static final String API_PARAMETERS = "&frequency=monthly&data[0]=value&facets[series][]=RBRTE&start=1999-02&sort[0][column]=period&sort[0][direction]=desc&offset=0&length=5000";
+    private static final String API_PARAMETERS = "&frequency=monthly&data[0]=value&facets[series][]=RBRTE&start=2004-01&sort[0][column]=period&sort[0][direction]=desc&offset=0&length=5000";
 
     // Method to fetch oil prices in USD from the API
     public static Map<String, String> fetchOilPriceInUSD() throws APIStatusException {
@@ -28,6 +28,7 @@ public class OilPriceApiClient {
             // Check if the HTTP response status code is 200 (OK)
             if (response.statusCode() == 200) {
                 // Parse and extract oil prices from the response
+                System.out.println("Oil prices API received succesfully!");
                 return parseAndExtractOilPrice(response.body());
             } else {
                 // Throw an exception for non-OK status codes

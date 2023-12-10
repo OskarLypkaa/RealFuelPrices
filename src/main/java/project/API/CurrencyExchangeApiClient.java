@@ -20,7 +20,7 @@ public class CurrencyExchangeApiClient {
     private static final String API_ACCESS_KEY = "7937cfd1f93a65a5865c4ebe9fe6aad7";
 
     private static final String targetCurrency = "USD,PLN";
-    private static LocalDate APIDate = LocalDate.of(1999, 2, 1);
+    private static LocalDate APIDate = LocalDate.of(2004, 1, 1);
     private static LocalDate currentDate = LocalDate.now();
     private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM");
 
@@ -48,6 +48,7 @@ public class CurrencyExchangeApiClient {
                 // Move to the next month
                 APIDate = APIDate.plusMonths(1);
             }
+            System.out.println("Exchange prices API received succesfully!");
             return exchangeRate;
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();

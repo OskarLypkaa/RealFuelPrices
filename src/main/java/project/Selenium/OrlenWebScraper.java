@@ -14,7 +14,7 @@ import java.util.*;
 
 public class OrlenWebScraper {
 
-    public static void main(String[] args) throws InterruptedException {
+    public static Map<String, String> fetchFuelPriceInPLN() throws InterruptedException {
         // Path to chromedriver.exe - adjust for your environment
         System.setProperty("webdriver.chrome.driver",
                 "D:\\atari\\Studia praca\\java\\real-fuel-prices\\src\\main\\java\\project\\Selenium\\webdriver\\chromedriver.exe");
@@ -62,6 +62,8 @@ public class OrlenWebScraper {
 
         // Close the browser
         driver.quit();
+        System.out.println("Fuel prices received succesfully!");
+        return tableData;
     }
 
     // Function to find missing data months
