@@ -19,15 +19,14 @@ public class OilPriceApiClient {
     private static final String API_TOKEN = "?api_key=1hU4hrUQ8qs1uR4L9UScdgCAqhDLNRBAmg9cchbv";
     private static final String API_PARAMETERS = "&frequency=monthly&data[0]=value&facets[series][]=RBRTE&start=1999-02&sort[0][column]=period&sort[0][direction]=desc&offset=0&length=5000";
 
-    public Map<String, Double> fetchOilPriceInUSD() throws APIStatusException {
+    public Map<String, String> fetchOilPriceInUSD() throws APIStatusException {
         try {
             HttpResponse<String> response = sendHttpRequest();
             if (response.statusCode() == 200) {
-                Map<String, Double> oilPrices = parseAndExtractOilPrice(response.body());
-
-                for (Map.Entry<String, Double> entry : oilPrices.entrySet()) {
+                Map<String, String> oilPrices = parseAndExtractOilPrice(response.body());
+                for (Map.Entry<String, String> entry : oilPrices.entrySet()) {
                     String period = entry.getKey();
-                    double value = entry.getValue();
+                    String value = entry.getValue();
                     System.out.println("Date: " + period + ", Value: " + value);
                 }
                 return parseAndExtractOilPrice(response.body());
@@ -49,8 +48,8 @@ public class OilPriceApiClient {
         return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
     }
 
-    private Map<String, Double> parseAndExtractOilPrice(String responseBody) {
-        Map<String, Double> result = new LinkedHashMap<>();
+    private Map<String, String> parseAndExtractOilPrice(String responseBody) {
+        Map<String, String> result = new LinkedHashMap<>();
 
         try {
             // Parse the JSON response
@@ -71,7 +70,7 @@ public class OilPriceApiClient {
                         // Extract information for each data entry
                         JsonObject dataEntry = dataArray.get(i).getAsJsonObject();
                         String period = dataEntry.get("period").getAsString();
-                        double value = dataEntry.get("value").getAsDouble();
+                        String value = dataEntry.get("value").getAsString();
 
                         // Put the extracted information into the result map
                         result.put(period, value);

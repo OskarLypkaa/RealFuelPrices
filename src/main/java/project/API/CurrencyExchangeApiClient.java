@@ -22,7 +22,7 @@ public class CurrencyExchangeApiClient {
     private LocalDate APIDate = LocalDate.of(1999, 5, 1);
     private LocalDate currentDate = LocalDate.now();
 
-    public Map<String, Double> fetchExchangeRate() throws APIStatusException {
+    public Map<String, String> fetchExchangeRate() throws APIStatusException {
         HttpResponse<String> response;
         Map<String, String> exchangeRate = new HashMap<>();
         try {
@@ -36,7 +36,7 @@ public class CurrencyExchangeApiClient {
                             "Failed to fetch exchange prices. HTTP Status Code: " + response.statusCode());
                 APIDate = APIDate.plusMonths(1);
             }
-            return null;
+            return exchangeRate;
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
             throw new APIStatusException("Failed to fetch oil prices due to an IO or InterruptedException.", e);
