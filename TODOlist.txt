@@ -1,0 +1,22 @@
+
+1. Change API Classes for Timeframe:
+    - Modify CurrencyExchangeApiClient to accept a startDate parameter for the API call.
+    - Modify OilPriceApiClient to accept a startDate parameter for the API call.
+
+2. Add Exception Handling in Analyzer:
+    - Implement exception handling in the OilPriceAnalyzer class to handle potential errors during analysis.
+
+3. Change Analyzer Map to <String, List>:
+    - Update the analyzedOilPricesInPLN method in OilPriceAnalyzer to use a map of <String, List> instead of <String, String>.
+
+4. Add USD Prices to <String, List>:
+    - Modify the analyzedOilPricesInPLN method in OilPriceAnalyzer to also store USD prices in the map.
+
+5. Change Everything to <String, List>:
+    - Update the data structures and method signatures in both API and analysis classes to use <String, List>.
+
+6. Get Diesel Prices from Orlen Webpage:
+    - Implement a method in OrlenWebScraper to fetch diesel prices from the Orlen webpage.
+
+7. Gather Additional Necessary Data:
+    - Identify and implement methods or classes to gather additional data like inflation rate, average income in Poland, prices in other currencies, and other relevant information.
