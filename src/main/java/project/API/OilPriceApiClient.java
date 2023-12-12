@@ -81,16 +81,16 @@ public class OilPriceApiClient {
                     }
                 } else {
                     // Handle the case where "data" is a JsonObject
-                    // You might want to log a warning or handle it accordingly based on your
-                    // requirements
                     System.out.println("Unexpected JSON structure: 'data' is not an array.");
+                    throw new RuntimeException("Unexpected JSON structure: 'data' is not an array.");
                 }
             } else {
                 // Handle the case where the key "data" is not present in the JSON response
                 System.out.println("JSON response does not contain the 'data' key.");
+                throw new RuntimeException("Unexpected JSON structure: 'data' is not an array.");
             }
         } catch (Exception e) {
-            e.printStackTrace(); // Handle the exception appropriately
+            e.printStackTrace();
         }
 
         return result;

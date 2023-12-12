@@ -5,9 +5,10 @@ import project.API.OilPriceApiClient;
 import project.Selenium.OrlenWebScraper;
 import project.analysis.OilPriceAnalyzer;
 import project.exceptions.APIStatusException;
+import project.exceptions.WSDataException;
 
 public class Main {
-    public static void main(String[] args) throws APIStatusException, InterruptedException {
+    public static void main(String[] args) throws APIStatusException, InterruptedException, WSDataException {
         long startTime = System.currentTimeMillis();
 
         OilPriceAnalyzer oilPriceInPLN = new OilPriceAnalyzer(

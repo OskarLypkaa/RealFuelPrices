@@ -8,62 +8,76 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import project.exceptions.WSDataException;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class OrlenWebScraper {
 
-    public static Map<String, String> fetchFuelPriceInPLN() throws InterruptedException {
-        // Path to chromedriver.exe - adjust for your environment
-        System.setProperty("webdriver.chrome.driver",
-                "D:\\atari\\Studia praca\\java\\real-fuel-prices\\src\\main\\java\\project\\Selenium\\webdriver\\chromedriver.exe");
+    public static Map<String, String> fetchFuelPriceInPLN() throws InterruptedException, WSDataException {
 
         // Initialize Chrome browser
         WebDriver driver = new ChromeDriver();
 
-        // Open the website
-        driver.get("https://www.orlen.pl/pl/dla-biznesu/hurtowe-ceny-paliw#paliwa-archive");
+        try {
+            // Path to chromedriver.exe - adjust for your environment
+            System.setProperty("webdriver.chrome.driver",
+                    "D:\\atari\\Studia praca\\java\\real-fuel-prices\\src\\main\\java\\project\\Selenium\\webdriver\\chromedriver.exe");
 
-        // Wait for the "I accept" (cookie consent) button to appear and click it
-        WebDriverWait wait = new WebDriverWait(driver, 10);
-        WebElement acceptButton = wait.until(ExpectedConditions
-                .elementToBeClickable(By.id("CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll")));
+            // Open the website
+            driver.get("https://www.orlen.pl/pl/dla-biznesu/hurtowe-ceny-paliw#paliwa-archive");
 
-        if (acceptButton.isDisplayed()) {
-            acceptButton.click();
-        }
+            // Wait for the "I accept" (cookie consent) button to appear and click it
+            WebDriverWait wait = new WebDriverWait(driver, 10);
+            WebElement acceptButton = wait.until(ExpectedConditions
+                    .elementToBeClickable(By.id("CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll")));
 
-        // Get data from the table with a specified class
-        Map<String, String> tableData = new LinkedHashMap<>();
-
-        // Iterate through years, select each year, and scrape data
-        for (int year = LocalDate.now().getYear(); year >= 2004; year--) {
-            selectYear(driver, year);
-            tableData.putAll(scrapeTableDataForFirstDays(driver, "table--effectivedate"));
-        }
-
-        // Display data
-        for (Map.Entry<String, String> entry : tableData.entrySet()) {
-            System.out.println(entry.getKey() + ": " + entry.getValue());
-        }
-
-        // Check if data is available for all months in each year
-        Set<String> missingDataMonths = findMissingDataMonths(tableData);
-
-        if (!missingDataMonths.isEmpty()) {
-            System.out.println("Missing data for months and years:");
-            for (String missingMonth : missingDataMonths) {
-                System.out.println(missingMonth);
+            if (acceptButton.isDisplayed()) {
+                acceptButton.click();
             }
-        } else {
-            System.out.println("Data available for all months and years.");
-        }
 
-        // Close the browser
-        driver.quit();
-        System.out.println("Fuel prices received succesfully!");
-        return tableData;
+            // Get data from the table with a specified class
+            Map<String, String> tableData = new LinkedHashMap<>();
+
+            // Iterate through years, select each year, and scrape data
+            for (int year = LocalDate.now().getYear(); year >= 2004; year--) {
+                selectYear(driver, year);
+                tableData.putAll(scrapeTableDataForFirstDays(driver, "table--effectivedate"));
+            }
+
+            // Display data
+            for (Map.Entry<String, String> entry : tableData.entrySet()) {
+                System.out.println(entry.getKey() + ": " + entry.getValue());
+            }
+
+            // Check if data is available for all months in each year
+            Set<String> missingDataMonths = findMissingDataMonths(tableData);
+
+            if (!missingDataMonths.isEmpty()) {
+                System.out.println("Missing data for months and years:");
+                for (String missingMonth : missingDataMonths) {
+                    System.out.println(missingMonth);
+                }
+                throw new WSDataException("Missing data for Orlen web scraper");
+            }
+
+            System.out.println("Fuel prices received succesfully!");
+            return tableData;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            System.err.println("InterruptedException: " + e.getMessage());
+            throw new WSDataException("Failed to fetch fuel prices due to InterruptedException.", e);
+        } catch (Exception e) {
+            System.err.println("Exception: " + e.getMessage());
+            throw new WSDataException("Failed to fetch fuel prices.", e);
+        } finally {
+            // Close the browser
+            if (driver != null) {
+                driver.quit();
+            }
+        }
     }
 
     // Function to find missing data months

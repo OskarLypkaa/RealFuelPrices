@@ -44,7 +44,6 @@ public class CurrencyExchangeApiClient {
                     throw new APIStatusException(
                             "Failed to fetch exchange prices. HTTP Status Code: " + response.statusCode());
                 }
-
                 // Move to the next month
                 APIDate = APIDate.plusMonths(1);
             }
