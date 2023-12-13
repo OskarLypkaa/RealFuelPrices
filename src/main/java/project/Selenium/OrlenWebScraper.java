@@ -16,15 +16,16 @@ import java.util.*;
 
 public class OrlenWebScraper {
 
-    public static Map<String, String> fetchFuelPriceInPLN() throws InterruptedException, WSDataException {
+    public static Map<String, List<String>> fetchFuelPriceInPLN() throws InterruptedException, WSDataException {
+
+        // Path to chromedriver.exe - adjust for your environment
+        System.setProperty("webdriver.chrome.driver",
+                "D:\\atari\\Studia praca\\java\\real-fuel-prices\\src\\main\\java\\project\\Selenium\\webdriver\\chromedriver.exe");
 
         // Initialize Chrome browser
         WebDriver driver = new ChromeDriver();
 
         try {
-            // Path to chromedriver.exe - adjust for your environment
-            System.setProperty("webdriver.chrome.driver",
-                    "D:\\atari\\Studia praca\\java\\real-fuel-prices\\src\\main\\java\\project\\Selenium\\webdriver\\chromedriver.exe");
 
             // Open the website
             driver.get("https://www.orlen.pl/pl/dla-biznesu/hurtowe-ceny-paliw#paliwa-archive");
@@ -39,17 +40,12 @@ public class OrlenWebScraper {
             }
 
             // Get data from the table with a specified class
-            Map<String, String> tableData = new LinkedHashMap<>();
+            Map<String, List<String>> tableData = new LinkedHashMap<>();
 
             // Iterate through years, select each year, and scrape data
             for (int year = LocalDate.now().getYear(); year >= 2004; year--) {
                 selectYear(driver, year);
                 tableData.putAll(scrapeTableDataForFirstDays(driver, "table--effectivedate"));
-            }
-
-            // Display data
-            for (Map.Entry<String, String> entry : tableData.entrySet()) {
-                System.out.println(entry.getKey() + ": " + entry.getValue());
             }
 
             // Check if data is available for all months in each year
@@ -63,7 +59,7 @@ public class OrlenWebScraper {
                 throw new WSDataException("Missing data for Orlen web scraper");
             }
 
-            System.out.println("Fuel prices received succesfully!");
+            System.out.println("Fuel prices received successfully!");
             return tableData;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -81,7 +77,7 @@ public class OrlenWebScraper {
     }
 
     // Function to find missing data months
-    public static Set<String> findMissingDataMonths(Map<String, String> tableData) {
+    public static Set<String> findMissingDataMonths(Map<String, List<String>> tableData) {
         Set<String> monthsWithData = tableData.keySet();
         Set<String> allMonthsInAllYears = generateAllMonthsInAllYearsSet();
         Set<String> missingDataMonths = new HashSet<>(allMonthsInAllYears);
@@ -131,9 +127,9 @@ public class OrlenWebScraper {
     }
 
     // Function to scrape table data for the first days of each month
-    public static Map<String, String> scrapeTableDataForFirstDays(WebDriver driver, String tableClass)
+    public static Map<String, List<String>> scrapeTableDataForFirstDays(WebDriver driver, String tableClass)
             throws InterruptedException {
-        Map<String, String> tableData = new LinkedHashMap<>();
+        Map<String, List<String>> tableData = new LinkedHashMap<>();
         JavascriptExecutor js = (JavascriptExecutor) driver;
         js.executeScript("window.scrollBy(0, 500);");
 
@@ -162,7 +158,8 @@ public class OrlenWebScraper {
                 // If we haven't fetched data for the current month, add to the map
                 if (!monthDataFetched.containsKey(month)) {
                     String key = formatToYearMonth(cells.get(0).getText());
-                    String value = cells.get(1).getText().replaceAll("\\s", ""); // Remove spaces from the value
+                    List<String> value = new ArrayList<>();
+                    value.add(cells.get(1).getText().replaceAll("\\s", ""));
                     tableData.put(key, value);
                     monthDataFetched.put(month, true);
                 }
