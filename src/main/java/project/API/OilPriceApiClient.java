@@ -6,30 +6,35 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 public class OilPriceApiClient {
     private static final String API_URL = "https://api.eia.gov/v2/petroleum/pri/spt/data/";
     private static final String API_TOKEN = "?api_key=1hU4hrUQ8qs1uR4L9UScdgCAqhDLNRBAmg9cchbv";
     private static final String API_PARAMETERS = "&frequency=monthly&data[0]=value&facets[series][]=RBRTE&start=2004-01&sort[0][column]=period&sort[0][direction]=desc&offset=0&length=5000";
+    private static final Double bblToLiters = 158.987295;
 
     // Method to fetch oil prices in USD from the API
-    public static Map<String, String> fetchOilPriceInUSD() throws APIStatusException {
+    public static Map<String, List<String>> fetchOilPriceInUSD() throws APIStatusException {
         try {
             // Send HTTP request to the API
             HttpResponse<String> response = sendHttpRequest();
-
+            Map<String, List<String>> result = new LinkedHashMap<>();
             // Check if the HTTP response status code is 200 (OK)
             if (response.statusCode() == 200) {
                 // Parse and extract oil prices from the response
-                System.out.println("Oil prices API received succesfully!");
-                return parseAndExtractOilPrice(response.body());
+                result = parseAndExtractOilPrice(response.body());
+                System.out.println("Oil prices API received successfully!");
+                return result;
             } else {
                 // Throw an exception for non-OK status codes
                 throw new APIStatusException("Failed to fetch oil prices. HTTP Status Code: " + response.statusCode());
@@ -37,7 +42,7 @@ public class OilPriceApiClient {
 
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
-            throw new APIStatusException("Failed to fetch oil prices due to an IO or InterruptedException.", e);
+            throw new APIStatusException("Failed to fetch oil prices due to IO or InterruptedException.", e);
         }
     }
 
@@ -52,8 +57,8 @@ public class OilPriceApiClient {
     }
 
     // Method to parse and extract oil prices from JSON response
-    private static Map<String, String> parseAndExtractOilPrice(String responseBody) {
-        Map<String, String> result = new LinkedHashMap<>();
+    private static Map<String, List<String>> parseAndExtractOilPrice(String responseBody) {
+        Map<String, List<String>> result = new LinkedHashMap<>();
 
         try {
             // Parse the JSON response
@@ -74,9 +79,14 @@ public class OilPriceApiClient {
                         // Extract information for each data entry
                         JsonObject dataEntry = dataArray.get(i).getAsJsonObject();
                         String period = dataEntry.get("period").getAsString();
-                        String value = dataEntry.get("value").getAsString();
+                        List<String> value = new ArrayList<>();
+                        // Give a value of one bbl in USD
+                        value.add(dataEntry.get("value").getAsString());
+                        // Give a value of one liter in USD
+                        Double valueInLiters = dataEntry.get("value").getAsDouble() / bblToLiters;
+                        String formattedValue = String.format("%.2f", valueInLiters);
+                        value.add(formattedValue.replace(",", "."));
 
-                        // Put the extracted information into the result map
                         result.put(period, value);
                     }
                 } else {
