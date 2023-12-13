@@ -20,5 +20,6 @@ public class Main {
         long endTime = System.currentTimeMillis();
         long duration = endTime - startTime;
         System.out.println("Time taken: " + duration + " milliseconds");
+        // JAn Bujas
     }
 }
