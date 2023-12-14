@@ -10,6 +10,8 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import project.exceptions.WSDataException;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -19,8 +21,11 @@ public class OrlenWebScraper {
     public static Map<String, List<String>> fetchFuelPriceInPLN() throws InterruptedException, WSDataException {
 
         // Path to chromedriver.exe - adjust for your environment
-        System.setProperty("webdriver.chrome.driver",
-                "D:\\atari\\Studia praca\\java\\real-fuel-prices\\src\\main\\java\\project\\Selenium\\webdriver\\chromedriver.exe");
+
+        String workingDirectory = System.getProperty("user.dir");
+        Path chromeDriverPath = Paths.get(workingDirectory, "src", "main", "java", "project", "Selenium", "webdriver", "chromedriver.exe");
+
+        System.setProperty("webdriver.chrome.driver", chromeDriverPath.toString());
 
         // Initialize Chrome browser
         WebDriver driver = new ChromeDriver();
