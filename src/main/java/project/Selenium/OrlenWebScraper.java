@@ -5,6 +5,7 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -23,7 +24,12 @@ public class OrlenWebScraper {
         // Path to chromedriver.exe - adjust for your environment
 
         String workingDirectory = System.getProperty("user.dir");
-        Path chromeDriverPath = Paths.get(workingDirectory, "src", "main", "java", "project", "Selenium", "webdriver", "chromedriver.exe");
+        Path chromeDriverPath = Paths.get(workingDirectory, "RealFuelPrices","src", "main", "java", "project", "Selenium", "webdriver", "chromedriver.exe");
+
+        // Set up ChromeOptions
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--headless"); // To run Chrome in headless mode (without GUI)
+
 
         System.setProperty("webdriver.chrome.driver", chromeDriverPath.toString());
 
