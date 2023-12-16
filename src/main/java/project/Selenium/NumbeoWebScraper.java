@@ -4,39 +4,26 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import project.exceptions.WSDataException;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class NumbeoWebScraper {
+public class NumbeoWebScraper extends WebScraper {
 
-    public static Map<String, List<String>> fetchData() throws WSDataException {
+    @Override
+    public Map<String, List<String>> fetchData() throws WSDataException {
+
         Map<String, List<String>> finaleDataMap = new HashMap<>();
 
-        // Path to chromedriver.exe - adjust for your environment
-        String workingDirectory = System.getProperty("user.dir");
-        Path chromeDriverPath = Paths.get(workingDirectory, "RealFuelPrices", "src", "main", "java", "project", "Selenium", "webdriver", "chromedriver.exe");
-
-        // Set up ChromeOptions
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless"); // To run Chrome in headless mode (without GUI)
-
-
-        System.setProperty("webdriver.chrome.driver", chromeDriverPath.toString());
-
         // Initialize Chrome browser
-        WebDriver driver = new ChromeDriver(options);
+        WebDriver driver = initializeChromeDriver();
 
         try {
             // Open the website
@@ -113,5 +100,16 @@ public class NumbeoWebScraper {
         }
         System.out.println("Finished!");
         return data;
+    }
+
+    public void printData(Map<String, List<String>> data) {
+        System.out.println("Printing Data:");
+        for (Map.Entry<String, List<String>> entry : data.entrySet()) {
+            System.out.println("Country: " + entry.getKey());
+            List<String> values = entry.getValue();
+            System.out.println("Fuel Price: " + values.get(0));
+            System.out.println("Income: " + values.get(1));
+            System.out.println("---------------");
+        }
     }
 }

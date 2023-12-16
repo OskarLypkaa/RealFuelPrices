@@ -4,37 +4,22 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import project.exceptions.WSDataException;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-public class OrlenWebScraper {
+public class OrlenWebScraper extends WebScraper {
 
-    public static Map<String, List<String>> fetchFuelPriceInPLN() throws InterruptedException, WSDataException {
-
-        // Path to chromedriver.exe - adjust for your environment
-
-        String workingDirectory = System.getProperty("user.dir");
-        Path chromeDriverPath = Paths.get(workingDirectory, "RealFuelPrices","src", "main", "java", "project", "Selenium", "webdriver", "chromedriver.exe");
-
-        // Set up ChromeOptions
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless"); // To run Chrome in headless mode (without GUI)
-
-
-        System.setProperty("webdriver.chrome.driver", chromeDriverPath.toString());
+    @Override
+    public Map<String, List<String>> fetchData() throws WSDataException {
 
         // Initialize Chrome browser
-        WebDriver driver = new ChromeDriver();
+        WebDriver driver = initializeChromeDriver();
 
         try {
 
@@ -88,7 +73,7 @@ public class OrlenWebScraper {
     }
 
     // Function to find missing data months
-    public static Set<String> findMissingDataMonths(Map<String, List<String>> tableData) {
+    private Set<String> findMissingDataMonths(Map<String, List<String>> tableData) {
         Set<String> monthsWithData = tableData.keySet();
         Set<String> allMonthsInAllYears = generateAllMonthsInAllYearsSet();
         Set<String> missingDataMonths = new HashSet<>(allMonthsInAllYears);
@@ -99,7 +84,7 @@ public class OrlenWebScraper {
     }
 
     // Function to generate all months in all years
-    private static Set<String> generateAllMonthsInAllYearsSet() {
+    private Set<String> generateAllMonthsInAllYearsSet() {
         Set<String> allMonthsInAllYears = new HashSet<>();
         int currentYear = LocalDate.now().getYear();
 
@@ -112,7 +97,7 @@ public class OrlenWebScraper {
     }
 
     // Function to select a year from the dropdown
-    private static void selectYear(WebDriver driver, int year) {
+    private void selectYear(WebDriver driver, int year) {
         WebDriverWait wait = new WebDriverWait(driver, 10);
 
         // Find the dropdown element
@@ -138,7 +123,7 @@ public class OrlenWebScraper {
     }
 
     // Function to scrape table data for the first days of each month
-    public static Map<String, List<String>> scrapeTableDataForFirstDays(WebDriver driver, String tableClass)
+    private Map<String, List<String>> scrapeTableDataForFirstDays(WebDriver driver, String tableClass)
             throws InterruptedException {
         Map<String, List<String>> tableData = new LinkedHashMap<>();
         JavascriptExecutor js = (JavascriptExecutor) driver;
@@ -189,5 +174,15 @@ public class OrlenWebScraper {
     // Function to parse a date
     private static LocalDate parseDate(String date) {
         return LocalDate.parse(date, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+    }
+
+    public void printData(Map<String, List<String>> data) {
+        System.out.println("Printing Data:");
+        for (Map.Entry<String, List<String>> entry : data.entrySet()) {
+            System.out.println("Year-Month: " + entry.getKey());
+            List<String> values = entry.getValue();
+            System.out.println("Fuel Price: " + values.get(0));
+            System.out.println("---------------");
+        }
     }
 }
