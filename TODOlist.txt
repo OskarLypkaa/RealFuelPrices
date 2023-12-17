@@ -1,8 +1,8 @@
 Add abstract method to Analyzier classes
-    - add methodes like dataPrint, mergeMaps
+    - Add methodes like dataPrint, mergeMaps.
 
 Correct CurrentDataAnalyzer class
-    - The class is in "Skeleton" mode and it's not connected to rest of the project
+    - The class is in "Skeleton" mode and it's not connected to rest of the project.
     - Remember to add amout of liters per one working date.
 
 Redesign HistoricalAnalyzer:
@@ -10,10 +10,12 @@ Redesign HistoricalAnalyzer:
     - Update the analyzedOilPricesInPLN method in OilPriceAnalyzer to use a map of <String, List> instead of <String, String>.
     - Use CompletableFuture so it'll make api request and fetch data in parallel.
 
+Finish updating CurrencyExchangeApiClient
+    - Class needs to be updated to fit new API with data provided daily. 
 
 Get Diesel Prices from Orlen Webpage:
     - Implement a method in OrlenWebScraper to fetch diesel prices from the Orlen webpage.
-    - change code so it can be run by Analyzer
+    - Change code so it can be run by Analyzer.
 
 Gather Additional Necessary Data:
     - Identify and implement methods or classes to gather additional data like inflation rate, average income in Poland, prices in other currencies, and other relevant information.
