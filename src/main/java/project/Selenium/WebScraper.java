@@ -28,4 +28,17 @@ public abstract class WebScraper {
 
         return new ChromeDriver(options);
     }
+
+    public void printData(Map<String, List<String>> data) {
+        System.out.println("Printing Data:");
+        for (Map.Entry<String, List<String>> entry : data.entrySet()) {
+            System.out.print(entry.getKey());
+            List<String> values = entry.getValue();
+            for(String value : values)
+                System.out.print(" " + value);
+            
+        System.out.println();
+        System.out.println("---------------");
+        }
+    }
 }

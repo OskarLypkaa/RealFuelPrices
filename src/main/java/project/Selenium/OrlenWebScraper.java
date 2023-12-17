@@ -175,14 +175,4 @@ public class OrlenWebScraper extends WebScraper {
     private static LocalDate parseDate(String date) {
         return LocalDate.parse(date, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
     }
-
-    public void printData(Map<String, List<String>> data) {
-        System.out.println("Printing Data:");
-        for (Map.Entry<String, List<String>> entry : data.entrySet()) {
-            System.out.println("Year-Month: " + entry.getKey());
-            List<String> values = entry.getValue();
-            System.out.println("Fuel Price: " + values.get(0));
-            System.out.println("---------------");
-        }
-    }
 }

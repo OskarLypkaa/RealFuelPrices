@@ -102,14 +102,4 @@ public class NumbeoWebScraper extends WebScraper {
         return data;
     }
 
-    public void printData(Map<String, List<String>> data) {
-        System.out.println("Printing Data:");
-        for (Map.Entry<String, List<String>> entry : data.entrySet()) {
-            System.out.println("Country: " + entry.getKey());
-            List<String> values = entry.getValue();
-            System.out.println("Fuel Price: " + values.get(0));
-            System.out.println("Income: " + values.get(1));
-            System.out.println("---------------");
-        }
-    }
 }
