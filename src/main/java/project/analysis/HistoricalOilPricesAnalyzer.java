@@ -3,12 +3,12 @@ package project.analysis;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class OilPriceAnalyzer {
+public class HistoricalOilPricesAnalyzer {
     private Map<String, String> oilPricesInUSD;
     private Map<String, String> exchangeRates;
 
     // Constructor to initialize the class with oil prices in USD and exchange rates
-    public OilPriceAnalyzer(Map<String, String> oilPricesInUSD, Map<String, String> exchangeRates) {
+    public HistoricalOilPricesAnalyzer(Map<String, String> oilPricesInUSD, Map<String, String> exchangeRates) {
         this.oilPricesInUSD = oilPricesInUSD;
         this.exchangeRates = exchangeRates;
 
