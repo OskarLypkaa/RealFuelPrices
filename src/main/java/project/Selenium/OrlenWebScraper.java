@@ -16,7 +16,7 @@ import java.util.*;
 public class OrlenWebScraper extends WebScraper {
 
     @Override
-    public Map<String, List<String>> fetchData() throws WSDataException {
+    public Map<String, List<String>> fetchData(String URLAddress) throws WSDataException {
 
         // Initialize Chrome browser
         WebDriver driver = initializeChromeDriver();
@@ -24,7 +24,8 @@ public class OrlenWebScraper extends WebScraper {
         try {
 
             // Open the website
-            driver.get("https://www.orlen.pl/pl/dla-biznesu/hurtowe-ceny-paliw#paliwa-archive");
+            // "https://www.orlen.pl/pl/dla-biznesu/hurtowe-ceny-paliw#paliwa-archive"
+            driver.get(URLAddress);
 
             // Wait for the "I accept" (cookie consent) button to appear and click it
             WebDriverWait wait = new WebDriverWait(driver, 10);

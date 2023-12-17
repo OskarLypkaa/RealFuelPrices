@@ -9,7 +9,6 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import project.exceptions.WSDataException;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,16 +17,19 @@ import java.util.Map;
 public class NumbeoWebScraper extends WebScraper {
 
     @Override
-    public Map<String, List<String>> fetchData() throws WSDataException {
+    public Map<String, List<String>> fetchData(String URLAddress) throws WSDataException {
 
         Map<String, List<String>> finaleDataMap = new HashMap<>();
+
+        // https://www.numbeo.com/cost-of-living/prices_by_country.jsp?displayCurrency=USD&itemId=105
+        // https://www.numbeo.com/cost-of-living/prices_by_country.jsp?displayCurrency=USD&itemId=24
 
         // Initialize Chrome browser
         WebDriver driver = initializeChromeDriver();
 
         try {
             // Open the website
-            driver.get("https://www.numbeo.com/cost-of-living/prices_by_country.jsp?displayCurrency=USD&itemId=24");
+            driver.get(URLAddress);
 
             // Accept choices
             WebElement acceptChoicesButton = driver.findElement(By.id("accept-choices"));
@@ -42,29 +44,8 @@ public class NumbeoWebScraper extends WebScraper {
             wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("t2")));
 
             // Fetch data from the first table
-            Map<String, List<String>> fuelDataMap = fetchDataFromTable(driver, "t2");
+            finaleDataMap = fetchDataFromTable(driver, "t2");
        
-
-            // Open the website with the second table
-            driver.get("https://www.numbeo.com/cost-of-living/prices_by_country.jsp?displayCurrency=USD&itemId=105");
-            
-            js.executeScript("window.scrollBy(0, 500);");
-            // Wait for the table to load
-            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("t2")));
-
-            // Fetch data from the second table
-            Map<String, List<String>> incomeDataMap = fetchDataFromTable(driver, "t2");
-            System.out.println("Starting to merge data");
-            incomeDataMap.forEach((key, value) -> {
-                if (fuelDataMap.containsKey(key)) {
-                    List<String> tempList = new ArrayList<>();
-                    tempList.add(fuelDataMap.get(key).get(0));
-                    tempList.add(value.get(0));
-            
-                    finaleDataMap.put(key, tempList);
-                }
-            });
-
         } catch (Exception e) {
             System.err.println("InterruptedException: " + e.getMessage());
             throw new WSDataException("Failed to fetch fuel prices or average salary due to InterruptedException.", e);
@@ -101,5 +82,4 @@ public class NumbeoWebScraper extends WebScraper {
         System.out.println("Finished!");
         return data;
     }
-
 }
