@@ -13,9 +13,7 @@ Redesign HistoricalAnalyzer:
 Finish updating CurrencyExchangeApiClient
     - Class needs to be updated to fit new API with data provided daily. 
 
-Get Diesel Prices from Orlen Webpage:
-    - Implement a method in OrlenWebScraper to fetch diesel prices from the Orlen webpage.
-    - Change code so it can be run by Analyzer.
+Change OrlenWebScraper code so it can be run by Analyzer.
 
 Gather Additional Necessary Data:
     - Identify and implement methods or classes to gather additional data like inflation rate, average income in Poland, prices in other currencies, and other relevant information.
