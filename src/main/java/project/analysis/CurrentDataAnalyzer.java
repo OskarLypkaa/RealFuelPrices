@@ -10,10 +10,10 @@ import java.util.concurrent.ExecutionException;
 public class CurrentDataAnalyzer {
     public static void main(String[] args) {
         // Sample asynchronous task 1
-        CompletableFuture<String> task1 = CompletableFuture.supplyAsync(() -> fetchDataFromSource1());
+        CompletableFuture<String> task1 = CompletableFuture.supplyAsync(CurrentDataAnalyzer::fetchDataFromSource1);
 
         // Sample asynchronous task 2
-        CompletableFuture<String> task2 = CompletableFuture.supplyAsync(() -> fetchDataFromSource2());
+        CompletableFuture<String> task2 = CompletableFuture.supplyAsync(CurrentDataAnalyzer::fetchDataFromSource2);
 
         // When both tasks are completed, perform an additional operation
         CompletableFuture<Void> combinedTask = CompletableFuture.allOf(task1, task2);
@@ -62,17 +62,17 @@ public class CurrentDataAnalyzer {
         for (Map.Entry<String, List<String>> entry : data.entrySet()) {
             System.out.print(entry.getKey());
             List<String> values = entry.getValue();
-            for(String value : values)
+            for (String value : values)
                 System.out.print(" " + value);
-            
-        System.out.println();
-        System.out.println("---------------");
+
+            System.out.println();
+            System.out.println("---------------");
         }
     }
 
     public static <K, V> Map<K, List<V>> mergeMaps(List<Map<K, List<V>>> maps) {
         Map<K, List<V>> mergedMap = new HashMap<>();
-    
+
         for (Map<K, List<V>> map : maps) {
             for (Map.Entry<K, List<V>> entry : map.entrySet()) {
                 K key = entry.getKey();
@@ -85,7 +85,7 @@ public class CurrentDataAnalyzer {
                 });
             }
         }
-    
+
         return mergedMap;
     }
 }
