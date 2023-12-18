@@ -16,7 +16,9 @@ import java.util.*;
 public class OrlenWebScraper extends WebScraper {
 
     @Override
-    public Map<String, List<String>> fetchData(String URLAddress) throws WSDataException {
+    public Map<String, List<String>> fetchData(String fuelType) throws WSDataException {
+        // Get data from the table with a specified class
+        Map<String, List<String>> tableData = new LinkedHashMap<>();
 
         // Initialize Chrome browser
         WebDriver driver = initializeChromeDriver();
@@ -24,8 +26,7 @@ public class OrlenWebScraper extends WebScraper {
         try {
 
             // Open the website
-            // "https://www.orlen.pl/pl/dla-biznesu/hurtowe-ceny-paliw#paliwa-archive"
-            driver.get(URLAddress);
+            driver.get("https://www.orlen.pl/pl/dla-biznesu/hurtowe-ceny-paliw#paliwa-archive");
 
             // Wait for the "I accept" (cookie consent) button to appear and click it
             WebDriverWait wait = new WebDriverWait(driver, 10);
@@ -36,8 +37,7 @@ public class OrlenWebScraper extends WebScraper {
                 acceptButton.click();
             }
 
-            // Get data from the table with a specified class
-            Map<String, List<String>> tableData = new LinkedHashMap<>();
+            selectFuelType(driver, fuelType);
 
             // Iterate through years, select each year, and scrape data
             for (int year = LocalDate.now().getYear(); year >= 2004; year--) {
@@ -56,8 +56,6 @@ public class OrlenWebScraper extends WebScraper {
                 throw new WSDataException("Missing data for Orlen web scraper");
             }
 
-            System.out.println("Fuel prices received successfully!");
-            return tableData;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             System.err.println("InterruptedException: " + e.getMessage());
@@ -71,6 +69,8 @@ public class OrlenWebScraper extends WebScraper {
                 driver.quit();
             }
         }
+        System.out.println("Fuel prices received successfully!");
+        return tableData;
     }
 
     // Function to find missing data months
@@ -95,6 +95,24 @@ public class OrlenWebScraper extends WebScraper {
             }
         }
         return allMonthsInAllYears;
+    }
+
+    private void selectFuelType(WebDriver driver, String fuelType) {
+        WebDriverWait wait = new WebDriverWait(driver, 10);
+
+        // Find the dropdown element
+        List<WebElement> dropdowns = driver.findElements(By.className("choices"));
+
+        // Click on the dropdown to expand the options
+        dropdowns.get(0).click();
+
+        // Define the dynamic fuel option selector based on the fuel type
+        By fuelOptionSelector = By.xpath("//div[text()='" + fuelType + "']");
+
+        WebElement fuelOption = wait.until(ExpectedConditions.elementToBeClickable(fuelOptionSelector));
+
+        // Click on the option to select it
+        fuelOption.click();
     }
 
     // Function to select a year from the dropdown

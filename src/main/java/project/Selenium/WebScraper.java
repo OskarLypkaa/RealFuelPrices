@@ -14,13 +14,14 @@ import java.util.Map;
 
 public abstract class WebScraper {
 
-    public abstract Map<String, List<String>> fetchData(String URLAddress) throws WSDataException;
+    public abstract Map<String, List<String>> fetchData(String dataSource) throws WSDataException;
 
     protected WebDriver initializeChromeDriver() {
         // Common code to initialize ChromeDriver with options
 
         String workingDirectory = System.getProperty("user.dir");
-        Path chromeDriverPath = Paths.get(workingDirectory, "RealFuelPrices", "src", "main", "java", "project", "Selenium", "webdriver", "chromedriver.exe");
+        Path chromeDriverPath = Paths.get(workingDirectory, "src", "main", "java", "project",
+                "Selenium", "webdriver", "chromedriver.exe");
 
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--headless");
