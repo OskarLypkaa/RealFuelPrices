@@ -1,5 +1,3 @@
-package project.analysis;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,17 +15,11 @@ public class CurrentDataAnalyzer {
 
         // When both tasks are completed, perform an additional operation
         CompletableFuture<Void> combinedTask = CompletableFuture.allOf(task1, task2);
-        combinedTask.thenRun(() -> {
-            try {
-                // Get results from both tasks
-                String result1 = task1.get();
-                String result2 = task2.get();
 
-                // Perform additional operation with the results
-                analyzeAndTransformData(result1, result2);
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-            }
+        // Use thenAcceptBoth to combine the results of both tasks
+        combinedTask.thenAcceptBothAsync(task1, task2, (result1, result2) -> {
+            // Perform additional operation with the results
+            analyzeAndTransformData(result1, result2);
         });
 
         // Wait until all tasks are completed
