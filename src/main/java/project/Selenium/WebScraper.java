@@ -8,11 +8,14 @@ import project.exceptions.WSDataException;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public abstract class WebScraper {
+
+    private static final Logger logger = Logger.getLogger(WebScraper.class.getName());
 
     public abstract Map<String, List<String>> fetchData(String dataSource) throws WSDataException;
 
@@ -27,6 +30,8 @@ public abstract class WebScraper {
         options.addArguments("--headless");
 
         System.setProperty("webdriver.chrome.driver", chromeDriverPath.toString());
+
+        logger.log(Level.INFO, "Initializing ChromeDriver with options: {0}", options);
 
         return new ChromeDriver(options);
     }

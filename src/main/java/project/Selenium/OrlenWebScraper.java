@@ -12,8 +12,12 @@ import project.exceptions.WSDataException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class OrlenWebScraper extends WebScraper {
+
+    private static final Logger logger = Logger.getLogger(OrlenWebScraper.class.getName());
 
     @Override
     public Map<String, List<String>> fetchData(String fuelType) throws WSDataException {
@@ -49,19 +53,16 @@ public class OrlenWebScraper extends WebScraper {
             Set<String> missingDataMonths = findMissingDataMonths(tableData);
 
             if (!missingDataMonths.isEmpty()) {
-                System.out.println("Missing data for months and years:");
-                for (String missingMonth : missingDataMonths) {
-                    System.out.println(missingMonth);
-                }
+                logger.log(Level.WARNING, "Missing data for months and years: {0}", missingDataMonths);
                 throw new WSDataException("Missing data for Orlen web scraper");
             }
 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            System.err.println("InterruptedException: " + e.getMessage());
+            logger.log(Level.SEVERE, "InterruptedException: {0}", e.getMessage());
             throw new WSDataException("Failed to fetch fuel prices due to InterruptedException.", e);
         } catch (Exception e) {
-            System.err.println("Exception: " + e.getMessage());
+            logger.log(Level.SEVERE, "Exception: {0}", e.getMessage());
             throw new WSDataException("Failed to fetch fuel prices.", e);
         } finally {
             // Close the browser
@@ -69,7 +70,7 @@ public class OrlenWebScraper extends WebScraper {
                 driver.quit();
             }
         }
-        System.out.println("Fuel prices received successfully!");
+        logger.log(Level.INFO, "Fuel prices received successfully!");
         return tableData;
     }
 

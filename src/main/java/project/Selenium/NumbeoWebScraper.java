@@ -13,16 +13,17 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class NumbeoWebScraper extends WebScraper {
+
+    private static final Logger logger = Logger.getLogger(NumbeoWebScraper.class.getName());
 
     @Override
     public Map<String, List<String>> fetchData(String URLAddress) throws WSDataException {
 
         Map<String, List<String>> finaleDataMap = new HashMap<>();
-
-        // https://www.numbeo.com/cost-of-living/prices_by_country.jsp?displayCurrency=USD&itemId=105
-        // https://www.numbeo.com/cost-of-living/prices_by_country.jsp?displayCurrency=USD&itemId=24
 
         // Initialize Chrome browser
         WebDriver driver = initializeChromeDriver();
@@ -43,17 +44,19 @@ public class NumbeoWebScraper extends WebScraper {
             WebDriverWait wait = new WebDriverWait(driver, 10);
             wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("t2")));
 
-            // Fetch data from the first table
+            // Fetch data from the table
             finaleDataMap = fetchDataFromTable(driver, "t2");
-       
+
         } catch (Exception e) {
-            System.err.println("InterruptedException: " + e.getMessage());
-            throw new WSDataException("Failed to fetch fuel prices or average salary due to InterruptedException.", e);
-        }
-        finally {
+            logger.log(Level.SEVERE, "Exception: {0}", e.getMessage());
+            throw new WSDataException("Failed to fetch data from Numbeo website.", e);
+        } finally {
             // Close the browser
-            driver.quit();
+            if (driver != null) {
+                driver.quit();
+            }
         }
+        logger.log(Level.INFO, "Data received successfully from Numbeo website!");
         return finaleDataMap;
     }
 
@@ -65,21 +68,25 @@ public class NumbeoWebScraper extends WebScraper {
 
         // Get all rows from the table
         List<WebElement> rows = table.findElements(By.tagName("tr"));
-        System.out.println("Starting to fetch table...");
+        logger.log(Level.INFO, "Starting to fetch table...");
+
         // Iterate over rows, starting from the second row (skip header)
         for (int i = 1; i < rows.size(); i++) {
             WebElement row = rows.get(i);
             List<WebElement> cells = row.findElements(By.tagName("td"));
             List<String> listOfPrices = new LinkedList<>();
+
             // Extract country name, fuel price, and income
             String country = cells.get(1).getText();
             String tableValue = cells.get(2).getText();
 
             listOfPrices.add(tableValue);
+
             // Store data in the map
             data.put(country, listOfPrices);
         }
-        System.out.println("Finished!");
+
+        logger.log(Level.INFO, "Finished fetching table!");
         return data;
     }
 }
