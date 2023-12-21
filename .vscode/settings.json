@@ -6,5 +6,6 @@
         "**/node_modules": true,
         "target": true
       },
-    "git.ignoreLegacyWarning": true    
+    "git.ignoreLegacyWarning": true,
+    "java.debug.settings.onBuildFailureProceed": true
 }
