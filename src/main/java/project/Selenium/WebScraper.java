@@ -27,7 +27,8 @@ public abstract class WebScraper {
                 "Selenium", "webdriver", "chromedriver.exe");
 
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless");
+        // options.addArguments("--headless"); <- Orlen web scraper is not working with
+        // this option, for unknown reason. Subject t to verify.
 
         System.setProperty("webdriver.chrome.driver", chromeDriverPath.toString());
 

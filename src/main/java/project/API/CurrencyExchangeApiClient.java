@@ -75,12 +75,12 @@ public class CurrencyExchangeApiClient {
                 // Move to the next day
                 APIDate = APIDate.plusDays(1);
             }
-            System.out.println("Exchange prices API received successfully!");
-            return exchangeRate;
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
             throw new APIStatusException("Failed to fetch exchanged rates due to IO or InterruptedException.", e);
         }
+        System.out.println("Exchange prices API received successfully!");
+        return exchangeRate;
     }
 
     // Method to send HTTP request to the API
