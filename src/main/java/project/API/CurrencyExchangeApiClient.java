@@ -9,6 +9,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -28,9 +30,9 @@ public class CurrencyExchangeApiClient {
     public static Map<String, List<String>> fetchExchangeRate() throws APIStatusException {
         LocalDate APIDate = LocalDate.of(2022, 4, 1);
         HttpResponse<String> response;
-        Map<String, List<String>> exchangeRate = new HashMap<>();
-        Map<String, String> oneYearExchangeRateMap = new HashMap<>();
-        List<String> oneYearExchangeRateList = new ArrayList<>();
+        Map<String, List<String>> exchangeRate = new LinkedHashMap<>();
+        Map<String, String> oneYearExchangeRateMap = new LinkedHashMap<>();
+        List<String> oneYearExchangeRateList = new LinkedList<>();
 
         try {
 
@@ -52,14 +54,21 @@ public class CurrencyExchangeApiClient {
                         if (oneYearExchangeRateMap.get(APIDate.toString()) != null)
                             oneYearExchangeRateList.add(oneYearExchangeRateMap.get(APIDate.toString()));
                         else {
-                            LocalDate tempAPIDate = APIDate;
-                            while (tempAPIDate.toString() == null) {
+                            LocalDate descrisingAPIDate = APIDate;
+                            LocalDate increasingAPIDate = APIDate;
+                            while (true) {
+                                if (oneYearExchangeRateMap.containsKey(descrisingAPIDate)) {
+                                    String valueDayBefore = oneYearExchangeRateMap.get(descrisingAPIDate.toString());
+                                    descrisingAPIDate = descrisingAPIDate.minusDays(1);
+                                }
                                 String valueDayBefore = oneYearExchangeRateMap.get(tempAPIDate.minusDays(1).toString());
                                 String valueDayAfter = oneYearExchangeRateMap.get(tempAPIDate.plusDays(1).toString());
-                                Double avrValue = Double.parseDouble(valueDayAfter) * Double.parseDouble(valueDayBefore)
-                                        / 2;
-                                oneYearExchangeRateList.add(avrValue.toString());
                             }
+
+                            Double avrValue = Double.parseDouble(valueDayAfter) * Double.parseDouble(valueDayBefore)
+                                    / 2;
+                            oneYearExchangeRateList.add(avrValue.toString());
+
                         }
 
                         exchangeRate.put(APIDate.toString(), oneYearExchangeRateList);
@@ -108,7 +117,7 @@ public class CurrencyExchangeApiClient {
 
     // Method to parse and extract exchange rates from JSON response
     private static Map<String, String> parseAndExtractExchangeRate(String responseBody) {
-        Map<String, String> result = new HashMap<>();
+        Map<String, String> result = new LinkedHashMap<>();
         try {
             // Parse the JSON response
             JsonArray jsonArray = JsonParser.parseString(responseBody).getAsJsonObject().getAsJsonArray("rates");
