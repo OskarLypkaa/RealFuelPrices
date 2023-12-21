@@ -54,21 +54,36 @@ public class CurrencyExchangeApiClient {
                         if (oneYearExchangeRateMap.get(APIDate.toString()) != null)
                             oneYearExchangeRateList.add(oneYearExchangeRateMap.get(APIDate.toString()));
                         else {
-                            LocalDate descrisingAPIDate = APIDate;
+                            LocalDate decrisingAPIDate = APIDate;
                             LocalDate increasingAPIDate = APIDate;
-                            while (true) {
-                                if (oneYearExchangeRateMap.containsKey(descrisingAPIDate)) {
-                                    String valueDayBefore = oneYearExchangeRateMap.get(descrisingAPIDate.toString());
-                                    descrisingAPIDate = descrisingAPIDate.minusDays(1);
+                            String valueBefore = new String();
+                            String valueAfter = new String();
+                            if (APIDate.getDayOfMonth() == 1) {
+                                while (true) {
+                                    if (oneYearExchangeRateMap.containsKey(decrisingAPIDate.toString())) {
+                                        valueBefore = oneYearExchangeRateMap.get(decrisingAPIDate.toString());
+                                        break;
+                                    } else {
+                                        decrisingAPIDate = decrisingAPIDate.minusDays(1);
+                                    }
                                 }
-                                String valueDayBefore = oneYearExchangeRateMap.get(tempAPIDate.minusDays(1).toString());
-                                String valueDayAfter = oneYearExchangeRateMap.get(tempAPIDate.plusDays(1).toString());
                             }
 
-                            Double avrValue = Double.parseDouble(valueDayAfter) * Double.parseDouble(valueDayBefore)
-                                    / 2;
+                            while (true) {
+                                if (oneYearExchangeRateMap.containsKey(increasingAPIDate.toString())) {
+                                    valueAfter = oneYearExchangeRateMap.get(increasingAPIDate.toString());
+                                    break;
+                                } else {
+                                    increasingAPIDate = increasingAPIDate.plusDays(1);
+                                }
+                            }
+                            Double avrValue;
+                            if (APIDate.getDayOfMonth() == 1) {
+                                avrValue = Double.parseDouble(valueAfter);
+                            } else {
+                                avrValue = Double.parseDouble(valueBefore) * Double.parseDouble(valueAfter) / 2;
+                            }
                             oneYearExchangeRateList.add(avrValue.toString());
-
                         }
 
                         exchangeRate.put(APIDate.toString(), oneYearExchangeRateList);
