@@ -5,14 +5,17 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -22,22 +25,36 @@ import project.exceptions.APIStatusException;
 
 public class CurrencyExchangeApiClient {
     private static final String API_URL = "http://api.nbp.pl/api/exchangerates/rates/a/";
+    private static final Logger logger = Logger.getLogger(CurrencyExchangeApiClient.class.getName());
+
+    static {
+        // Configure the logger to write log messages to a file
+        try {
+            FileHandler fileHandler = new FileHandler("currency_exchange_api.log");
+            SimpleFormatter formatter = new SimpleFormatter();
+            fileHandler.setFormatter(formatter);
+            logger.addHandler(fileHandler);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     private static LocalDate currentDate = LocalDate.now();
     private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     // Method to fetch exchange rates for EUR and USD from the API
     public static Map<String, List<String>> fetchExchangeRate() throws APIStatusException {
+        logger.info("Fetching exchange rates from the API...");
+
         LocalDate APIDate = LocalDate.of(2022, 4, 1);
         HttpResponse<String> response;
         Map<String, List<String>> exchangeRate = new LinkedHashMap<>();
-        Map<String, String> oneYearExchangeRateMap = new LinkedHashMap<>();
-        List<String> oneYearExchangeRateList = new LinkedList<>();
+        List<String> oneYearExchangeRateList;
 
         try {
-
             // Iterate through dates from API start date to current date
             while (APIDate.getYear() <= currentDate.getYear()) {
+                logger.info("Working on: " + APIDate.getYear());
                 // Time sleep for API not to receive status code: 429
                 Thread.sleep(1000);
 
@@ -46,71 +63,93 @@ public class CurrencyExchangeApiClient {
 
                 // Check if the HTTP response status code is 200 (OK)
                 if (response.statusCode() == 200) {
-
                     // Format date and parse exchange rate from response for EUR
-                    oneYearExchangeRateMap = parseAndExtractExchangeRate(response.body());
-
-                    while (!APIDate.isEqual(APIDate.plusYears(1)) || !APIDate.isEqual(currentDate)) {
-                        if (oneYearExchangeRateMap.get(APIDate.toString()) != null)
-                            oneYearExchangeRateList.add(oneYearExchangeRateMap.get(APIDate.toString()));
-                        else {
-                            LocalDate decrisingAPIDate = APIDate;
-                            LocalDate increasingAPIDate = APIDate;
-                            String valueBefore = new String();
-                            String valueAfter = new String();
-                            if (APIDate.getDayOfMonth() == 1) {
-                                while (true) {
-                                    if (oneYearExchangeRateMap.containsKey(decrisingAPIDate.toString())) {
-                                        valueBefore = oneYearExchangeRateMap.get(decrisingAPIDate.toString());
-                                        break;
-                                    } else {
-                                        decrisingAPIDate = decrisingAPIDate.minusDays(1);
-                                    }
-                                }
-                            }
-
-                            while (true) {
-                                if (oneYearExchangeRateMap.containsKey(increasingAPIDate.toString())) {
-                                    valueAfter = oneYearExchangeRateMap.get(increasingAPIDate.toString());
-                                    break;
-                                } else {
-                                    increasingAPIDate = increasingAPIDate.plusDays(1);
-                                }
-                            }
-                            Double avrValue;
-                            if (APIDate.getDayOfMonth() == 1) {
-                                avrValue = Double.parseDouble(valueAfter);
-                            } else {
-                                avrValue = Double.parseDouble(valueBefore) * Double.parseDouble(valueAfter) / 2;
-                            }
-                            oneYearExchangeRateList.add(avrValue.toString());
-                        }
-
-                        exchangeRate.put(APIDate.toString(), oneYearExchangeRateList);
-                        APIDate = APIDate.plusDays(1);
-                    }
-
+                    oneYearExchangeRateList = fetchOneYearExchangeRates(response.body(), APIDate);
+                    exchangeRate.put(APIDate.toString(), oneYearExchangeRateList);
                 } else {
                     // Throw an exception for non-OK status codes
                     throw new APIStatusException(
                             "Failed to fetch exchange prices. HTTP Status Code: " + response.statusCode());
                 }
-                System.out.println("Request succesfull!");
-                // Move to the next day
-                APIDate = APIDate.plusDays(1);
+                logger.info("Request successful for year: " + APIDate.getYear());
+                APIDate = APIDate.plusYears(1);
             }
         } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Failed to fetch exchanged rates due to IO or InterruptedException.", e);
             throw new APIStatusException("Failed to fetch exchanged rates due to IO or InterruptedException.", e);
         }
-        System.out.println("Exchange prices API received successfully!");
+        logger.info("Exchange prices API received successfully!");
         return exchangeRate;
     }
+
+
+    // Method to fetch exchange rates for one year and return a list of values
+    private static List<String> fetchOneYearExchangeRates(String responseBody, LocalDate startingDate) {
+        Map<String, String> oneYearExchangeRateMap = parseAndExtractExchangeRate(responseBody);
+        List<String> oneYearExchangeRateList = new LinkedList<>();
+
+        LocalDate newAPIDate = startingDate;
+
+        while (!newAPIDate.isEqual(startingDate.plusYears(1).minusDays(1)) && newAPIDate.isBefore(currentDate)) {
+            if (oneYearExchangeRateMap.get(newAPIDate.toString()) != null)
+                oneYearExchangeRateList.add(oneYearExchangeRateMap.get(newAPIDate.toString()));
+            else {
+                LocalDate decreasingAPIDate = newAPIDate.minusDays(1);
+                LocalDate increasingAPIDate = newAPIDate.plusDays(1);
+                String valueBefore = oneYearExchangeRateMap.get(decreasingAPIDate.toString());
+                String valueAfter = oneYearExchangeRateMap.get(increasingAPIDate.toString());
+
+                if (valueBefore == null) {
+                    while (true) {
+                        if (oneYearExchangeRateMap.containsKey(decreasingAPIDate.toString())) {
+                            valueBefore = oneYearExchangeRateMap.get(decreasingAPIDate.toString());
+                            break;
+                        } else {
+                            decreasingAPIDate = decreasingAPIDate.minusDays(1);
+                        }
+                    }
+                }
+
+                while (!newAPIDate.isEqual(startingDate.plusYears(1).minusDays(1)) && newAPIDate.isBefore(currentDate)) {
+                    if (oneYearExchangeRateMap.containsKey(increasingAPIDate.toString())) {
+                        valueAfter = oneYearExchangeRateMap.get(increasingAPIDate.toString());
+                        break;
+                    } else {
+                        increasingAPIDate = increasingAPIDate.plusDays(1);
+                    }
+                }
+
+                oneYearExchangeRateMap.put(newAPIDate.toString(), valueBefore);
+                Double avrValue;
+                String formatedAvrValue = new String();
+                if (newAPIDate.getDayOfMonth() == 1) {
+                    if (valueAfter != null) {
+                        avrValue = Double.parseDouble(valueAfter);
+                    } else {
+                        logger.warning("valueAfter is null for date: " + newAPIDate);
+                        avrValue = Double.parseDouble(valueBefore);
+                    }
+                } else {
+                    avrValue = (Double.parseDouble(valueBefore) + Double.parseDouble(valueAfter))/2;
+                    DecimalFormat decimalFormat = new DecimalFormat("#.####");
+                    formatedAvrValue = decimalFormat.format(avrValue); 
+                }
+
+                logger.info("avrValue for date " + newAPIDate + ": " + formatedAvrValue);
+                oneYearExchangeRateList.add(formatedAvrValue);
+            }
+
+            newAPIDate = newAPIDate.plusDays(1);
+        }
+
+        return oneYearExchangeRateList;
+    }
+
+
 
     // Method to send HTTP request to the API
     private static HttpResponse<String> sendHttpRequest(String currencyCode, LocalDate startingDate)
             throws IOException, InterruptedException {
-
         String urlWithParams;
         // Create the API URL with parameters
         if (startingDate.getYear() != currentDate.getYear()) {
@@ -146,7 +185,7 @@ public class CurrencyExchangeApiClient {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Error parsing JSON response.", e);
         }
         return result;
     }
