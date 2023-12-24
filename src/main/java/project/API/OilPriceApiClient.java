@@ -16,12 +16,29 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 public class OilPriceApiClient {
     private static final String API_URL = "https://api.eia.gov/v2/petroleum/pri/spt/data/";
     private static final String API_TOKEN = "?api_key=1hU4hrUQ8qs1uR4L9UScdgCAqhDLNRBAmg9cchbv";
     private static final String API_PARAMETERS = "&frequency=monthly&data[0]=value&facets[series][]=RBRTE&start=2004-01&sort[0][column]=period&sort[0][direction]=desc&offset=0&length=5000";
     private static final Double bblToLiters = 158.987295;
+    private static final Logger logger = Logger.getLogger(OilPriceApiClient.class.getName());
+
+    static {
+        // Configure the logger to write log messages to a file
+        try {
+            FileHandler fileHandler = new FileHandler("oil_price_api.log");
+            SimpleFormatter formatter = new SimpleFormatter();
+            fileHandler.setFormatter(formatter);
+            logger.addHandler(fileHandler);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     // Method to fetch oil prices in USD from the API
     public static Map<String, List<String>> fetchOilPriceInUSD() throws APIStatusException {
@@ -33,7 +50,7 @@ public class OilPriceApiClient {
             if (response.statusCode() == 200) {
                 // Parse and extract oil prices from the response
                 result = parseAndExtractOilPrice(response.body());
-                System.out.println("Oil prices API received successfully!");
+                logger.info("Oil prices API received successfully!");
                 return result;
             } else {
                 // Throw an exception for non-OK status codes
@@ -41,7 +58,7 @@ public class OilPriceApiClient {
             }
 
         } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Failed to fetch oil prices due to IO or InterruptedException.", e);
             throw new APIStatusException("Failed to fetch oil prices due to IO or InterruptedException.", e);
         }
     }
@@ -91,16 +108,16 @@ public class OilPriceApiClient {
                     }
                 } else {
                     // Handle the case where "data" is a JsonObject
-                    System.out.println("Unexpected JSON structure: 'data' is not an array.");
+                    logger.log(Level.SEVERE, "Unexpected JSON structure: 'data' is not an array.");
                     throw new RuntimeException("Unexpected JSON structure: 'data' is not an array.");
                 }
             } else {
                 // Handle the case where the key "data" is not present in the JSON response
-                System.out.println("JSON response does not contain the 'data' key.");
+                logger.log(Level.SEVERE, "JSON response does not contain the 'data' key.");
                 throw new RuntimeException("Unexpected JSON structure: 'data' is not an array.");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Error parsing JSON response.", e);
         }
 
         return result;
