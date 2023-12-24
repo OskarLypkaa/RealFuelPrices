@@ -14,6 +14,7 @@ Finish updating CurrencyExchangeApiClient
     - Class needs to be updated to fit new API with data provided daily. 
 
 Add logging to every class and a way to display them, as well as store tha data  
+    - Classes CurrencyExchangeApiClient and OilPriceApiclient are done
 
 Change OrlenWebScraper code so it can be run by Analyzer.
 
