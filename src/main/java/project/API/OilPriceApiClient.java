@@ -7,12 +7,15 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,9 +32,20 @@ public class OilPriceApiClient {
     private static final Logger logger = Logger.getLogger(OilPriceApiClient.class.getName());
 
     static {
-        // Configure the logger to write log messages to a file
+        // Configure the logger to write log messages to a file in the "Logs" folder
         try {
-            FileHandler fileHandler = new FileHandler("oil_price_api.log");
+            // Create the "Logs" folder if it doesn't exist
+            File logsFolder = new File("Logs");
+            if (!logsFolder.exists()) {
+                logsFolder.mkdirs();
+            }
+
+            // Create a file handler with a name containing class name, date, and time
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+            String logFileName = String.format("Logs/%s_%s.log", OilPriceApiClient.class.getSimpleName(), dateFormat.format(new Date()));
+            FileHandler fileHandler = new FileHandler(logFileName);
+
+            // Set formatter and add the file handler to the logger
             SimpleFormatter formatter = new SimpleFormatter();
             fileHandler.setFormatter(formatter);
             logger.addHandler(fileHandler);

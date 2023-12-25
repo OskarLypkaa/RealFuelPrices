@@ -1,13 +1,16 @@
 package project.API;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,10 +30,21 @@ public class CurrencyExchangeApiClient {
     private static final String API_URL = "http://api.nbp.pl/api/exchangerates/rates/a/";
     private static final Logger logger = Logger.getLogger(CurrencyExchangeApiClient.class.getName());
 
-    static {
-        // Configure the logger to write log messages to a file
+     static {
+        // Configure the logger to write log messages to a file in the "Logs" folder
         try {
-            FileHandler fileHandler = new FileHandler("currency_exchange_api.log");
+            // Create the "Logs" folder if it doesn't exist
+            File logsFolder = new File("Logs");
+            if (!logsFolder.exists()) {
+                logsFolder.mkdirs();
+            }
+
+            // Create a file handler with a name containing class name, date, and time
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+            String logFileName = String.format("Logs/%s_%s.log", CurrencyExchangeApiClient.class.getSimpleName(), dateFormat.format(new Date()));
+            FileHandler fileHandler = new FileHandler(logFileName);
+
+            // Set formatter and add the file handler to the logger
             SimpleFormatter formatter = new SimpleFormatter();
             fileHandler.setFormatter(formatter);
             logger.addHandler(fileHandler);
