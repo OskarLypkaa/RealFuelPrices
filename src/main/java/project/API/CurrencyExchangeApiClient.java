@@ -56,7 +56,7 @@ public class CurrencyExchangeApiClient {
             while (APIDate.getYear() <= currentDate.getYear()) {
                 logger.info("Working on: " + APIDate.getYear());
                 // Time sleep for API not to receive status code: 429
-                Thread.sleep(1000);
+                Thread.sleep(100);
 
                 // Send HTTP request to the API for EUR
                 response = sendHttpRequest("eur", APIDate);
@@ -99,18 +99,19 @@ public class CurrencyExchangeApiClient {
                 String valueBefore = oneYearExchangeRateMap.get(decreasingAPIDate.toString());
                 String valueAfter = oneYearExchangeRateMap.get(increasingAPIDate.toString());
 
-                if (valueBefore == null) {
-                    while (true) {
-                        if (oneYearExchangeRateMap.containsKey(decreasingAPIDate.toString())) {
-                            valueBefore = oneYearExchangeRateMap.get(decreasingAPIDate.toString());
-                            break;
-                        } else {
-                            decreasingAPIDate = decreasingAPIDate.minusDays(1);
-                        }
+
+                
+                while (valueBefore != null) {
+                    if (oneYearExchangeRateMap.containsKey(decreasingAPIDate.toString())) {
+                        valueBefore = oneYearExchangeRateMap.get(decreasingAPIDate.toString());
+                        break;
+                    } else {
+                        decreasingAPIDate = decreasingAPIDate.minusDays(1);
                     }
                 }
+                
 
-                while (!newAPIDate.isEqual(startingDate.plusYears(1).minusDays(1)) && newAPIDate.isBefore(currentDate)) {
+                while (!increasingAPIDate.isEqual(startingDate.plusYears(1).minusDays(1)) && increasingAPIDate.isBefore(currentDate)) {
                     if (oneYearExchangeRateMap.containsKey(increasingAPIDate.toString())) {
                         valueAfter = oneYearExchangeRateMap.get(increasingAPIDate.toString());
                         break;
@@ -119,21 +120,24 @@ public class CurrencyExchangeApiClient {
                     }
                 }
 
-                oneYearExchangeRateMap.put(newAPIDate.toString(), valueBefore);
+                
                 Double avrValue;
                 String formatedAvrValue = new String();
-                if (newAPIDate.getDayOfMonth() == 1) {
+                if (newAPIDate.getDayOfMonth() == 1 || valueAfter == null) {
                     if (valueAfter != null) {
                         avrValue = Double.parseDouble(valueAfter);
+                        valueBefore = valueAfter;
                     } else {
-                        logger.warning("valueAfter is null for date: " + newAPIDate);
                         avrValue = Double.parseDouble(valueBefore);
                     }
                 } else {
-                    avrValue = (Double.parseDouble(valueBefore) + Double.parseDouble(valueAfter))/2;
-                    DecimalFormat decimalFormat = new DecimalFormat("#.####");
-                    formatedAvrValue = decimalFormat.format(avrValue); 
+                    avrValue = (Double.parseDouble(valueBefore) + (valueAfter != null ? Double.parseDouble(valueAfter) : 0)) / 2;
                 }
+                
+                DecimalFormat decimalFormat = new DecimalFormat("#.####");
+                formatedAvrValue = decimalFormat.format(avrValue); 
+
+                oneYearExchangeRateMap.put(newAPIDate.toString(), valueBefore);
 
                 logger.info("avrValue for date " + newAPIDate + ": " + formatedAvrValue);
                 oneYearExchangeRateList.add(formatedAvrValue);
