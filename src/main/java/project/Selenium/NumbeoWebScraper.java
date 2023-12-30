@@ -14,11 +14,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+
 
 public class NumbeoWebScraper extends WebScraper {
-
-    private static final Logger logger = Logger.getLogger(NumbeoWebScraper.class.getName());
 
     @Override
     public Map<String, List<String>> fetchData(String URLAddress) throws WSDataException {

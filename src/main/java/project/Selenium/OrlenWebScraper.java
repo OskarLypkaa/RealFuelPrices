@@ -13,11 +13,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class OrlenWebScraper extends WebScraper {
-
-    private static final Logger logger = Logger.getLogger(OrlenWebScraper.class.getName());
 
     @Override
     public Map<String, List<String>> fetchData(String fuelType) throws WSDataException {
