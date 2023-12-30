@@ -1,69 +1,36 @@
 package project.API;
 
-import java.io.File;
+import project.exceptions.APIStatusException;
+
 import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.FileHandler;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import project.exceptions.APIStatusException;
 
-public class CurrencyExchangeApiClient {
+
+public class CurrencyExchangeApiClient extends ApiClient{
     private static final String API_URL = "http://api.nbp.pl/api/exchangerates/rates/a/";
-    private static final Logger logger = Logger.getLogger(CurrencyExchangeApiClient.class.getName());
+    private static final LocalDate currentDate = LocalDate.now();
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-     static {
-        // Configure the logger to write log messages to a file in the "Logs" folder
-        try {
-            // Create the "Logs" folder if it doesn't exist
-            File logsFolder = new File("Logs");
-            if (!logsFolder.exists()) {
-                logsFolder.mkdirs();
-            }
 
-            // Create a file handler with a name containing class name, date, and time
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
-            String logFileName = String.format("Logs/%s_%s.log", CurrencyExchangeApiClient.class.getSimpleName(), dateFormat.format(new Date()));
-            FileHandler fileHandler = new FileHandler(logFileName);
-
-            // Set formatter and add the file handler to the logger
-            SimpleFormatter formatter = new SimpleFormatter();
-            fileHandler.setFormatter(formatter);
-            logger.addHandler(fileHandler);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static LocalDate currentDate = LocalDate.now();
-    private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
-    // Method to fetch exchange rates for EUR and USD from the API
-    public static Map<String, List<String>> fetchExchangeRate() throws APIStatusException {
-        logger.info("Fetching exchange rates from the API...");
+    @Override
+    public Map<String, List<String>> fetchData() throws APIStatusException {
+        getLogger().info("Fetching exchange rates from the API...");
 
         LocalDate APIDate = LocalDate.of(2022, 4, 1);
         HttpResponse<String> response;
         Map<String, List<String>> exchangeRate = new LinkedHashMap<>();
-        List<String> oneYearExchangeRateList;
 
         try {
             // Iterate through dates from API start date to current date
@@ -73,13 +40,12 @@ public class CurrencyExchangeApiClient {
                 Thread.sleep(100);
 
                 // Send HTTP request to the API for EUR
-                response = sendHttpRequest("eur", APIDate);
+                response = sendHttpRequest(API_URL ,"" , generateApiParams("eur", APIDate));
 
                 // Check if the HTTP response status code is 200 (OK)
                 if (response.statusCode() == 200) {
                     // Format date and parse exchange rate from response for EUR
-                    oneYearExchangeRateList = fetchOneYearExchangeRates(response.body(), APIDate);
-                    exchangeRate.put(APIDate.toString(), oneYearExchangeRateList);
+                    exchangeRate.putAll(fetchOneYearExchangeRates(response.body(), APIDate));
                 } else {
                     // Throw an exception for non-OK status codes
                     throw new APIStatusException(
@@ -98,15 +64,19 @@ public class CurrencyExchangeApiClient {
 
 
     // Method to fetch exchange rates for one year and return a list of values
-    private static List<String> fetchOneYearExchangeRates(String responseBody, LocalDate startingDate) {
+    private static Map<String, List<String>> fetchOneYearExchangeRates(String responseBody, LocalDate startingDate) {
         Map<String, String> oneYearExchangeRateMap = parseAndExtractExchangeRate(responseBody);
-        List<String> oneYearExchangeRateList = new LinkedList<>();
+        Map<String, List<String>> formatedOneYearExchangeRateMap = new LinkedHashMap<>();
 
         LocalDate newAPIDate = startingDate;
 
         while (!newAPIDate.isEqual(startingDate.plusYears(1).minusDays(1)) && newAPIDate.isBefore(currentDate)) {
+            List<String> tempList = new LinkedList<>();
             if (oneYearExchangeRateMap.get(newAPIDate.toString()) != null)
-                oneYearExchangeRateList.add(oneYearExchangeRateMap.get(newAPIDate.toString()));
+            {
+                tempList.add(oneYearExchangeRateMap.get(newAPIDate.toString()));
+                formatedOneYearExchangeRateMap.put(newAPIDate.toString(), tempList);
+            }
             else {
                 LocalDate decreasingAPIDate = newAPIDate.minusDays(1);
                 LocalDate increasingAPIDate = newAPIDate.plusDays(1);
@@ -154,37 +124,30 @@ public class CurrencyExchangeApiClient {
                 oneYearExchangeRateMap.put(newAPIDate.toString(), valueBefore);
 
                 logger.info("avrValue for date " + newAPIDate + ": " + formatedAvrValue);
-                oneYearExchangeRateList.add(formatedAvrValue);
+                
+                tempList.add(formatedAvrValue);
+                formatedOneYearExchangeRateMap.put(newAPIDate.toString(), tempList);
             }
 
             newAPIDate = newAPIDate.plusDays(1);
         }
 
-        return oneYearExchangeRateList;
+        return formatedOneYearExchangeRateMap;
     }
 
 
 
-    // Method to send HTTP request to the API
-    private static HttpResponse<String> sendHttpRequest(String currencyCode, LocalDate startingDate)
-            throws IOException, InterruptedException {
-        String urlWithParams;
+    // Method to generate API parameters
+    private static String generateApiParams(String currencyCode, LocalDate startingDate) throws IOException, InterruptedException {
+        String apiParams;
         // Create the API URL with parameters
         if (startingDate.getYear() != currentDate.getYear()) {
             String nextYearDate = startingDate.plusYears(1).format(formatter);
-            urlWithParams = String.format("%s%s/%s/%s/?format=json", API_URL, currencyCode,
-                    startingDate.format(formatter), nextYearDate);
+            apiParams = String.format("%s/%s/%s/?format=json", currencyCode,startingDate.format(formatter), nextYearDate);
         } else {
-            urlWithParams = String.format("%s%s/%s/%s/?format=json", API_URL, currencyCode,
-                    startingDate.format(formatter), currentDate);
+            apiParams = String.format("%s/%s/%s/?format=json", currencyCode, startingDate.format(formatter), currentDate);
         }
-
-        // Create HttpClient and HttpRequest
-        HttpClient httpClient = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(urlWithParams)).build();
-
-        // Send the HTTP request and return the response
-        return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        return apiParams;
     }
 
     // Method to parse and extract exchange rates from JSON response
