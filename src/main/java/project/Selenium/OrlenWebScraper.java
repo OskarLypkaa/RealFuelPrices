@@ -6,7 +6,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-
 import project.exceptions.WSDataException;
 
 import java.time.LocalDate;
@@ -25,14 +24,12 @@ public class OrlenWebScraper extends WebScraper {
         WebDriver driver = initializeChromeDriver();
 
         try {
-
             // Open the website
             driver.get("https://www.orlen.pl/pl/dla-biznesu/hurtowe-ceny-paliw#paliwa-archive");
 
             // Wait for the "I accept" (cookie consent) button to appear and click it
             WebDriverWait wait = new WebDriverWait(driver, 10);
-            WebElement acceptButton = wait.until(ExpectedConditions
-                    .elementToBeClickable(By.id("CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll")));
+            WebElement acceptButton = wait.until(ExpectedConditions.elementToBeClickable(By.id("CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll")));
 
             if (acceptButton.isDisplayed()) {
                 acceptButton.click();
@@ -43,7 +40,7 @@ public class OrlenWebScraper extends WebScraper {
             // Iterate through years, select each year, and scrape data
             for (int year = LocalDate.now().getYear(); year >= 2004; year--) {
                 selectYear(driver, year);
-                tableData.putAll(scrapeTableDataForFirstDays(driver, "table--effectivedate"));
+                tableData.putAll(scrapeTableDataForAllDays(driver, "table--effectivedate"));
             }
 
             // Check if data is available for all months in each year
@@ -127,21 +124,18 @@ public class OrlenWebScraper extends WebScraper {
         By yearOptionSelector = By.cssSelector(".choices__list--dropdown [data-value='" + year + "']");
         WebElement yearOption = wait.until(ExpectedConditions.elementToBeClickable(yearOptionSelector));
 
-        // Click on the option to select it
-        yearOption.click();
+        // Scroll to the year option
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", yearOption);
 
-        // Wait for the appearance of the button with the class "js-filter-items btn
-        // btn--red"
-        WebElement filterButton = wait
-                .until(ExpectedConditions.elementToBeClickable(By.cssSelector(".js-filter-items.btn.btn--red")));
+        // Wait for the appearance of the button with the class "js-filter-items btn btn--red"
+        WebElement filterButton = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".js-filter-items.btn.btn--red")));
 
         // Click the button
         filterButton.click();
     }
 
-    // Function to scrape table data for the first days of each month
-    private Map<String, List<String>> scrapeTableDataForFirstDays(WebDriver driver, String tableClass)
-            throws InterruptedException {
+    // Function to scrape table data for all days
+    private Map<String, List<String>> scrapeTableDataForAllDays(WebDriver driver, String tableClass) throws InterruptedException {
         Map<String, List<String>> tableData = new LinkedHashMap<>();
         JavascriptExecutor js = (JavascriptExecutor) driver;
         js.executeScript("window.scrollBy(0, 500);");
@@ -150,13 +144,11 @@ public class OrlenWebScraper extends WebScraper {
         Thread.sleep(200);
 
         // Find the table element by class
-        WebElement table = driver.findElement(By.className(tableClass));
+        WebDriverWait wait = new WebDriverWait(driver, 10);
+        WebElement tableElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("table--effectivedate")));
 
         // Find all rows in the table
-        List<WebElement> rows = table.findElements(By.tagName("tr"));
-
-        // Map to track whether we have already fetched data for a given month
-        Map<Integer, Boolean> monthDataFetched = new HashMap<>();
+        List<WebElement> rows = tableElement.findElements(By.tagName("tr"));
 
         // Loop through rows
         for (int i = 0; i < rows.size(); i++) {
@@ -165,20 +157,13 @@ public class OrlenWebScraper extends WebScraper {
 
             // If the row has at least two cells and the first cell contains a date
             if (cells.size() >= 2) {
-                LocalDate currentDate = parseDate(cells.get(0).getText());
-                int month = currentDate.getMonthValue();
-
-                // If we haven't fetched data for the current month, add to the map
-                if (!monthDataFetched.containsKey(month)) {
-                    String key = formatToYearMonth(cells.get(0).getText());
-                    List<String> value = new ArrayList<>();
-                    value.add(cells.get(1).getText().replaceAll("\\s", ""));
-                    tableData.put(key, value);
-                    monthDataFetched.put(month, true);
-                }
+                String key = formatToYearMonth(cells.get(0).getText());
+                List<String> value = new ArrayList<>();
+                value.add(cells.get(1).getText().replaceAll("\\s", ""));
+                tableData.put(key, value);
             }
         }
-        js.executeScript("window.scrollBy(0, -500);");
+        js.executeScript("window.scrollBy(0, -1000);");
         return tableData;
     }
 
