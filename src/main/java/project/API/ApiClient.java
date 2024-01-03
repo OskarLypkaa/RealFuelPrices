@@ -16,9 +16,21 @@ import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
-
-
 public abstract class ApiClient {
+
+    public abstract Map<String, List<String>> fetchData(String data) throws APIStatusException;
+
+    public abstract Map<String, List<String>> fetchData() throws APIStatusException;
+
+    protected HttpResponse<String> sendHttpRequest(String apiUrl, String apiToken, String apiParameters)
+            throws IOException, InterruptedException {
+        HttpClient httpClient = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(apiUrl + apiToken + apiParameters))
+                .build();
+
+        return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+    }
 
     protected static final Logger logger = Logger.getLogger(ApiClient.class.getName());
 
@@ -30,7 +42,8 @@ public abstract class ApiClient {
             }
 
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
-            String logFileName = String.format("Logs/%s_%s.log", ApiClient.class.getSimpleName(), dateFormat.format(new Date()));
+            String logFileName = String.format("Logs/%s_%s.log", ApiClient.class.getSimpleName(),
+                    dateFormat.format(new Date()));
             FileHandler fileHandler = new FileHandler(logFileName);
 
             SimpleFormatter formatter = new SimpleFormatter();
@@ -44,18 +57,4 @@ public abstract class ApiClient {
     protected Logger getLogger() {
         return logger;
     }
-
-
-    public abstract Map<String, List<String>> fetchData() throws APIStatusException;
-
-    protected HttpResponse<String> sendHttpRequest(String apiUrl, String apiToken, String apiParameters)
-            throws IOException, InterruptedException {
-        HttpClient httpClient = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(apiUrl + apiToken + apiParameters))
-                .build();
-
-        return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-    }
 }
-    

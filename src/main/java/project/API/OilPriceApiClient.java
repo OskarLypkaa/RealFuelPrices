@@ -18,10 +18,12 @@ import java.util.Map;
 import java.util.logging.Level;
 
 public class OilPriceApiClient extends ApiClient {
-    private static final LocalDate StartingDate = LocalDate.of(2023, 4, 1);
+    private static final LocalDate StartingDate = LocalDate.of(2004, 4, 1);
     private static final String API_URL = "https://api.eia.gov/v2/petroleum/pri/spt/data/";
     private static final String API_TOKEN = "?api_key=1hU4hrUQ8qs1uR4L9UScdgCAqhDLNRBAmg9cchbv";
-    private static final String API_PARAMETERS = "&frequency=daily&data[0]=value&facets[series][]=RBRTE&start=" + StartingDate.format(DateTimeFormatter.ISO_LOCAL_DATE) + "&sort[0][column]=period&sort[0][direction]=desc&offset=0&length=5000";
+    private static final String API_PARAMETERS = "&frequency=daily&data[0]=value&facets[series][]=RBRTE&start="
+            + StartingDate.format(DateTimeFormatter.ISO_LOCAL_DATE)
+            + "&sort[0][column]=period&sort[0][direction]=desc&offset=0&length=5000";
     private static final Double bblToLiters = 158.987295;
 
     // Method to fetch oil prices in USD from the API
@@ -96,5 +98,11 @@ public class OilPriceApiClient extends ApiClient {
         }
 
         return result;
+    }
+
+    @Override
+    public Map<String, List<String>> fetchData(String data) throws APIStatusException {
+        logger.info("Parameters are not required for this class");
+        return null;
     }
 }

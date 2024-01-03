@@ -29,7 +29,8 @@ public class OrlenWebScraper extends WebScraper {
 
             // Wait for the "I accept" (cookie consent) button to appear and click it
             WebDriverWait wait = new WebDriverWait(driver, 10);
-            WebElement acceptButton = wait.until(ExpectedConditions.elementToBeClickable(By.id("CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll")));
+            WebElement acceptButton = wait.until(ExpectedConditions
+                    .elementToBeClickable(By.id("CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll")));
 
             if (acceptButton.isDisplayed()) {
                 acceptButton.click();
@@ -41,14 +42,7 @@ public class OrlenWebScraper extends WebScraper {
             for (int year = LocalDate.now().getYear(); year >= 2004; year--) {
                 selectYear(driver, year);
                 tableData.putAll(scrapeTableDataForAllDays(driver, "table--effectivedate"));
-            }
-
-            // Check if data is available for all months in each year
-            Set<String> missingDataMonths = findMissingDataMonths(tableData);
-
-            if (!missingDataMonths.isEmpty()) {
-                logger.log(Level.WARNING, "Missing data for months and years: {0}", missingDataMonths);
-                throw new WSDataException("Missing data for Orlen web scraper");
+                logger.info("Fetched " + fuelType + " data from year:" + year);
             }
 
         } catch (InterruptedException e) {
@@ -66,30 +60,6 @@ public class OrlenWebScraper extends WebScraper {
         }
         logger.log(Level.INFO, "Fuel prices received successfully!");
         return tableData;
-    }
-
-    // Function to find missing data months
-    private Set<String> findMissingDataMonths(Map<String, List<String>> tableData) {
-        Set<String> monthsWithData = tableData.keySet();
-        Set<String> allMonthsInAllYears = generateAllMonthsInAllYearsSet();
-        Set<String> missingDataMonths = new HashSet<>(allMonthsInAllYears);
-
-        missingDataMonths.removeAll(monthsWithData);
-
-        return missingDataMonths;
-    }
-
-    // Function to generate all months in all years
-    private Set<String> generateAllMonthsInAllYearsSet() {
-        Set<String> allMonthsInAllYears = new HashSet<>();
-        int currentYear = LocalDate.now().getYear();
-
-        for (int year = 2004; year <= currentYear; year++) {
-            for (int month = 1; month <= 12; month++) {
-                allMonthsInAllYears.add(formatToYearMonth("01-" + String.format("%02d", month) + "-" + year));
-            }
-        }
-        return allMonthsInAllYears;
     }
 
     private void selectFuelType(WebDriver driver, String fuelType) {
@@ -126,16 +96,19 @@ public class OrlenWebScraper extends WebScraper {
 
         // Scroll to the year option
         ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", yearOption);
-
-        // Wait for the appearance of the button with the class "js-filter-items btn btn--red"
-        WebElement filterButton = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".js-filter-items.btn.btn--red")));
+        yearOption.click();
+        // Wait for the appearance of the button with the class "js-filter-items btn
+        // btn--red"
+        WebElement filterButton = wait
+                .until(ExpectedConditions.elementToBeClickable(By.cssSelector(".js-filter-items.btn.btn--red")));
 
         // Click the button
         filterButton.click();
     }
 
     // Function to scrape table data for all days
-    private Map<String, List<String>> scrapeTableDataForAllDays(WebDriver driver, String tableClass) throws InterruptedException {
+    private Map<String, List<String>> scrapeTableDataForAllDays(WebDriver driver, String tableClass)
+            throws InterruptedException {
         Map<String, List<String>> tableData = new LinkedHashMap<>();
         JavascriptExecutor js = (JavascriptExecutor) driver;
         js.executeScript("window.scrollBy(0, 500);");
@@ -145,7 +118,8 @@ public class OrlenWebScraper extends WebScraper {
 
         // Find the table element by class
         WebDriverWait wait = new WebDriverWait(driver, 10);
-        WebElement tableElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("table--effectivedate")));
+        WebElement tableElement = wait
+                .until(ExpectedConditions.visibilityOfElementLocated(By.className("table--effectivedate")));
 
         // Find all rows in the table
         List<WebElement> rows = tableElement.findElements(By.tagName("tr"));
