@@ -32,7 +32,8 @@ public abstract class WebScraper {
             }
 
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
-            String logFileName = String.format("Logs/%s_%s.log", ApiClient.class.getSimpleName(), dateFormat.format(new Date()));
+            String logFileName = String.format("Logs/%s_%s.log", ApiClient.class.getSimpleName(),
+                    dateFormat.format(new Date()));
             FileHandler fileHandler = new FileHandler(logFileName);
 
             SimpleFormatter formatter = new SimpleFormatter();
@@ -57,7 +58,7 @@ public abstract class WebScraper {
                 "Selenium", "webdriver", "chromedriver.exe");
 
         ChromeOptions options = new ChromeOptions();
-        // options.addArguments("--headless"); <- Orlen web scraper is not working with
+        options.addArguments("--headless");// <- Orlen web scraper is not working with
         // this option, for unknown reason. Subject to verify.
 
         System.setProperty("webdriver.chrome.driver", chromeDriverPath.toString());
