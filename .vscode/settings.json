@@ -7,5 +7,13 @@
         "target": true
       },
     "git.ignoreLegacyWarning": true,
-    "java.debug.settings.onBuildFailureProceed": true
+    "java.debug.settings.onBuildFailureProceed": true,
+    "java.configuration.runtimes": [
+      {
+          "name": "JavaSE-17",
+          "path": "c:/Program Files/Java/jdk-17.0.2",
+          "default": true
+      }
+    ],
+    "java.compile.nullAnalysis.mode": "automatic"
 }
