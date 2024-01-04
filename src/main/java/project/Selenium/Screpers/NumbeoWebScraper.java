@@ -1,4 +1,4 @@
-package project.Selenium;
+package project.Selenium.Screpers;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -7,6 +7,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import project.Selenium.WebScraper;
 import project.exceptions.WSDataException;
 
 import java.util.HashMap;
@@ -14,7 +15,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
-
 
 public class NumbeoWebScraper extends WebScraper {
 
