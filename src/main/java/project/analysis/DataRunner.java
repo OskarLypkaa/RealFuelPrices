@@ -1,5 +1,8 @@
 package project.analysis;
 
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -31,7 +34,14 @@ public class DataRunner {
         private static final WebScraper orlenWebScraper = new OrlenWebScraper();
         private static final WebScraper numbeoWebScraper = new NumbeoWebScraper();
 
-        public static void main(String[] args) {
+        private static Map<String, String> tasksStatusMap = new LinkedHashMap<>();
+
+        public static List<Map<String, List<String>>> fetchAllData() {
+
+                List<Map<String, List<String>>> finalResultList = new LinkedList<Map<String, List<String>>>();
+                List<Map<String, List<String>>> historicalResultList = new LinkedList<Map<String, List<String>>>();
+                List<Map<String, List<String>>> currentResultList = new LinkedList<Map<String, List<String>>>();
+
                 // Initialize asynchronous tasks
                 CompletableFuture<Map<String, List<String>>> task1 = CompletableFuture
                                 .supplyAsync(() -> executeTask(() -> fetchDataWithCurrency(EURO), "Task 1"));
@@ -54,34 +64,44 @@ public class DataRunner {
                 List<CompletableFuture<Map<String, List<String>>>> allTasks = List.of(
                                 task1, task2, task3, task4, task5, task6, task7, task8);
 
+                List<CompletableFuture<Map<String, List<String>>>> historicalDataTasks = List.of(
+                                task1, task2, task3, task4, task5, task6);
+
+                List<CompletableFuture<Map<String, List<String>>>> currentDataTasks = List.of(
+                                task7, task8);
+
                 CompletableFuture<Void> allOf = CompletableFuture
                                 .allOf(allTasks.toArray(new CompletableFuture[0]));
 
                 // Wait for completion of all tasks
                 allOf.join();
 
-                // Print information about the results of each task
-                for (int i = 0; i < allTasks.size(); i++) {
-                        CompletableFuture<Map<String, List<String>>> task = allTasks.get(i);
+                for (int i = 0; i < historicalDataTasks.size(); i++) {
+                        CompletableFuture<Map<String, List<String>>> task = historicalDataTasks.get(i);
                         try {
                                 Map<String, List<String>> result = task.get();
-                                System.out.println("Task " + (i + 1) + " Done");
+                                historicalResultList.add(result);
                         } catch (InterruptedException | ExecutionException e) {
-                                // Print error messages for each failed task
                                 e.printStackTrace();
-
-                                // Identify which task failed
-                                if (e.getCause() instanceof APIStatusException) {
-                                        System.out.println("Task " + (i + 1) + " Failed: APIStatusException");
-                                } else if (e.getCause() instanceof WSDataException) {
-                                        System.out.println("Task " + (i + 1) + " Failed: WSDataException");
-                                } else {
-                                        System.out.println("Task " + (i + 1) + " Failed: Unknown error occurred.");
-                                }
                         }
                 }
 
+                for (int i = 0; i < currentDataTasks.size(); i++) {
+                        CompletableFuture<Map<String, List<String>>> task = currentDataTasks.get(i);
+                        try {
+                                Map<String, List<String>> result = task.get();
+                                currentResultList.add(result);
+                        } catch (InterruptedException | ExecutionException e) {
+                                e.printStackTrace();
+                        }
+                }
+                printTasksStatus();
+
+                // finalResultList.add(historicalResultList);
+                // finalResultList.add(currentResultList);
+
                 System.out.println("All tasks completed.");
+                return finalResultList;
         }
 
         private static Map<String, List<String>> fetchDataWithCurrency(String currency) throws APIStatusException {
@@ -102,14 +122,29 @@ public class DataRunner {
 
         private static <T> T executeTask(TaskSupplier<T> taskSupplier, String taskName) {
                 try {
-                        return taskSupplier.get();
+                        T result = taskSupplier.get();
+                        tasksStatusMap.put(taskName, "Done!");
+                        return result;
                 } catch (Exception e) {
-                        System.out.println(taskName + " Failed: " + e.getClass().getSimpleName());
+                        tasksStatusMap.put(taskName, "Failed: " + e.getClass().getSimpleName());
                         return null;
                 }
         }
 
         interface TaskSupplier<T> {
                 T get() throws Exception;
+        }
+
+        private static void printTasksStatus() {
+                tasksStatusMap.entrySet().stream()
+                                .sorted(Comparator.comparing(entry -> extractTaskNumber(entry.getKey())))
+                                .forEach(entry -> System.out.println(entry.getKey() + " " + entry.getValue()));
+        }
+
+        private static int extractTaskNumber(String taskName) {
+                // Extract the task number from the task name (assuming the task name starts
+                // with "Task ")
+                String numberString = taskName.replaceAll("[^0-9]", "");
+                return Integer.parseInt(numberString);
         }
 }
