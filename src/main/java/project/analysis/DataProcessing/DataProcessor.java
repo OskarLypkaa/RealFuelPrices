@@ -1,4 +1,4 @@
-package project.analysis;
+package project.analysis.DataProcessing;
 
 import java.util.List;
 import java.util.Map;
