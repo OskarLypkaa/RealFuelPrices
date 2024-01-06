@@ -133,7 +133,10 @@ public class OrlenWebScraper extends WebScraper {
 
             // If the row has at least two cells and the first cell contains a date
             if (cells.size() >= 2) {
-                String key = formatToYearMonth(cells.get(0).getText());
+                String key = formatToYearMonthDay(cells.get(0).getText());
+
+                if (LocalDate.parse(key).isBefore(LocalDate.of(2004, 4, 1)))
+                    return tableData;
                 List<String> value = new ArrayList<>();
                 value.add(cells.get(1).getText().replaceAll("\\s", ""));
                 tableData.put(key, value);
@@ -144,9 +147,9 @@ public class OrlenWebScraper extends WebScraper {
     }
 
     // Function to format a date to year-month
-    private static String formatToYearMonth(String date) {
+    private static String formatToYearMonthDay(String date) {
         LocalDate localDate = parseDate(date);
-        return localDate.format(DateTimeFormatter.ofPattern("yyyy-MM"));
+        return localDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
     }
 
     // Function to parse a date
