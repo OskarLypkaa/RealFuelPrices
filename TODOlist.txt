@@ -1,10 +1,9 @@
-Gather Additional Necessary Data:
-    - Identify and implement methods or classes to gather additional data like inflation rate, average income in Poland, prices in other currencies, and other relevant information.
+Add continents to the number of countries. (?)
 
-Adding continents to numbeo countries
+for historical data - urgent
+    - Change the format of prices to be the same in every data set. 
+    - Add additional data sets based on the existing one.
 
-Change format of prices to be the same in every data set
+Made a DB connection and submitted all the data.
 
-Adding additional data set based on exiting one
-
-Adding infaltion rate date + AVG from fuel price (starting from first date in %). Monthly
+Add inflation rate date + AVG from fuel price (starting from the first date in%) Monthly
