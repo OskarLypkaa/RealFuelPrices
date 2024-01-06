@@ -10,6 +10,8 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import project.Selenium.WebScraper;
 import project.exceptions.WSDataException;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -61,6 +63,8 @@ public class OrlenWebScraper extends WebScraper {
             }
         }
         logger.log(Level.INFO, "Fuel prices received successfully!");
+
+        tableData = correctPricesFormat(tableData);
         return tableData;
     }
 
@@ -155,5 +159,36 @@ public class OrlenWebScraper extends WebScraper {
     // Function to parse a date
     private static LocalDate parseDate(String date) {
         return LocalDate.parse(date, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+    }
+
+    private static Map<String, List<String>> correctPricesFormat(Map<String, List<String>> data) {
+        Map<String, List<String>> result = new LinkedHashMap<>();
+
+        for (Map.Entry<String, List<String>> entry : data.entrySet()) {
+            List<String> originalPrices = entry.getValue();
+            List<String> formattedPrices = new ArrayList<>();
+
+            for (String originalPrice : originalPrices) {
+                String formattedPrice = formatPrice(originalPrice);
+                formattedPrices.add(formattedPrice);
+            }
+
+            result.put(entry.getKey(), formattedPrices);
+        }
+
+        return result;
+    }
+
+    private static String formatPrice(String originalPrice) {
+        try {
+            long priceValue = Long.parseLong(originalPrice);
+            DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+            symbols.setGroupingSeparator('.');
+
+            DecimalFormat df = new DecimalFormat("#,###", symbols);
+            return df.format(priceValue);
+        } catch (NumberFormatException e) {
+            return originalPrice;
+        }
     }
 }
