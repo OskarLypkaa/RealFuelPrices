@@ -14,6 +14,9 @@ import project.API.Clients.OilPriceApiClient;
 import project.Selenium.WebScraper;
 import project.Selenium.Screpers.NumbeoWebScraper;
 import project.Selenium.Screpers.OrlenWebScraper;
+import project.analysis.DataProcessing.CurrentDataProcessor;
+import project.analysis.DataProcessing.DataProcessor;
+import project.analysis.DataProcessing.HistoricalDataProcessor;
 import project.exceptions.APIStatusException;
 import project.exceptions.WSDataException;
 
@@ -41,6 +44,9 @@ public class DataRunner {
                 List<Map<String, List<String>>> finalResultList = new LinkedList<Map<String, List<String>>>();
                 List<Map<String, List<String>>> historicalResultList = new LinkedList<Map<String, List<String>>>();
                 List<Map<String, List<String>>> currentResultList = new LinkedList<Map<String, List<String>>>();
+
+                DataProcessor currentDataProcessor = new CurrentDataProcessor();
+                DataProcessor historicalDataProcessor = new HistoricalDataProcessor();
 
                 // Initialize asynchronous tasks
                 CompletableFuture<Map<String, List<String>>> task1 = CompletableFuture
@@ -95,10 +101,11 @@ public class DataRunner {
                                 e.printStackTrace();
                         }
                 }
-                printTasksStatus();
 
-                // finalResultList.add(historicalResultList);
-                // finalResultList.add(currentResultList);
+                finalResultList.add(currentDataProcessor.processCurrentData(currentResultList));
+                finalResultList.add(historicalDataProcessor.processHistoricalData(historicalResultList));
+
+                printTasksStatus();
 
                 System.out.println("All tasks completed.");
                 return finalResultList;
