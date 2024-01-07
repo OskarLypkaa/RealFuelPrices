@@ -1,7 +1,7 @@
 package project.API.Clients;
 
 import project.API.ApiClient;
-import project.exceptions.APIStatusException;
+import project.Exceptions.APIStatusException;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;

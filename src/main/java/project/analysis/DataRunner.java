@@ -11,14 +11,14 @@ import java.util.concurrent.ExecutionException;
 import project.API.ApiClient;
 import project.API.Clients.CurrencyExchangeApiClient;
 import project.API.Clients.OilPriceApiClient;
+import project.Exceptions.APIStatusException;
+import project.Exceptions.WSDataException;
 import project.Selenium.WebScraper;
 import project.Selenium.Screpers.NumbeoWebScraper;
 import project.Selenium.Screpers.OrlenWebScraper;
 import project.analysis.DataProcessing.CurrentDataProcessor;
 import project.analysis.DataProcessing.DataProcessor;
 import project.analysis.DataProcessing.HistoricalDataProcessor;
-import project.exceptions.APIStatusException;
-import project.exceptions.WSDataException;
 
 public class DataRunner {
 

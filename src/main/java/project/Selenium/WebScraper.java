@@ -5,7 +5,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 
 import project.API.ApiClient;
-import project.exceptions.WSDataException;
+import project.Exceptions.WSDataException;
 
 import java.io.File;
 import java.io.IOException;

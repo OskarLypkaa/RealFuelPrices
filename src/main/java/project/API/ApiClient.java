@@ -1,7 +1,5 @@
 package project.API;
 
-import project.exceptions.APIStatusException;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -15,6 +13,8 @@ import java.util.Map;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
+
+import project.Exceptions.APIStatusException;
 
 public abstract class ApiClient {
 

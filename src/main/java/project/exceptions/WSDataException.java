@@ -1,4 +1,4 @@
-package project.exceptions;
+package project.Exceptions;
 
 public class WSDataException extends Exception {
     public WSDataException(String message) {

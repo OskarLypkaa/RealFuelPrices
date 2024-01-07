@@ -7,8 +7,8 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import project.Exceptions.WSDataException;
 import project.Selenium.WebScraper;
-import project.exceptions.WSDataException;
 
 import java.util.HashMap;
 import java.util.LinkedList;

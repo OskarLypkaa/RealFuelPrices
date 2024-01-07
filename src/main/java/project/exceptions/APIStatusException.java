@@ -1,4 +1,4 @@
-package project.exceptions;
+package project.Exceptions;
 
 public class APIStatusException extends Exception {
     public APIStatusException(String message) {
