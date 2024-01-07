@@ -1,9 +1,5 @@
 Add continents to the number of countries. (?)
 
-for historical data - urgent
-    - Change the format of prices to be the same in every data set. 
-    - Add additional data sets based on the existing one.
-
 Made a DB connection and submitted all the data.
 
 Add inflation rate date + AVG from fuel price (starting from the first date in%) Monthly
