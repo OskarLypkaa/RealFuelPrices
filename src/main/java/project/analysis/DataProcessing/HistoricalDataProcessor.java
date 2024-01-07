@@ -1,5 +1,6 @@
 package project.analysis.DataProcessing;
 
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -19,12 +20,21 @@ public class HistoricalDataProcessor extends DataProcessor {
 
         for (Map<String, List<String>> individualMap : historicalResultList) {
             Map<String, List<String>> filledMap = fillMapWithMissingDates(individualMap);
+            System.out.println("Sorting...");
             filledMap = sortMapByDate(filledMap);
+            System.out.println("Adding missing data...");
             filledMap = fillMapWithMissingData(filledMap);
+            System.out.println("Correcting data format...");
+            filledMap = correctDataFormat(filledMap);
+
             correctedHistoricalResultList.add(filledMap);
         }
 
         Map<String, List<String>> resultMap = mergeMaps(correctedHistoricalResultList);
+        System.out.println("Adding new data...");
+
+        resultMap = calculateNewData(resultMap);
+
         return resultMap;
     }
 
@@ -50,7 +60,6 @@ public class HistoricalDataProcessor extends DataProcessor {
     }
 
     public Map<String, List<String>> sortMapByDate(Map<String, List<String>> dataMap) {
-        System.out.println("Sorting...");
         return dataMap.entrySet().stream()
                 .sorted(Map.Entry.comparingByKey(Comparator.reverseOrder()))
                 .collect(Collectors.toMap(
@@ -142,5 +151,53 @@ public class HistoricalDataProcessor extends DataProcessor {
         } else {
             return nearbyValues.get(0);
         }
+    }
+
+    private static Map<String, List<String>> correctDataFormat(Map<String, List<String>> dataMap) {
+        Map<String, List<String>> correctedDataMap = new LinkedHashMap<>();
+
+        for (Map.Entry<String, List<String>> entry : dataMap.entrySet()) {
+            List<String> correctedList = new ArrayList<>();
+
+            for (String value : entry.getValue()) {
+                value = value.replace(",", ".");
+                double num = Double.parseDouble(value);
+                DecimalFormat df = new DecimalFormat("#.##");
+                String correctedValue = df.format(num);
+                correctedValue = correctedValue.replace(",", ".");
+                correctedList.add(correctedValue);
+            }
+
+            correctedDataMap.put(entry.getKey(), correctedList);
+
+        }
+
+        return correctedDataMap;
+    }
+
+    private static Map<String, List<String>> calculateNewData(Map<String, List<String>> dataMap) {
+        Map<String, List<String>> correctedDataMap = new LinkedHashMap<>();
+
+        for (Map.Entry<String, List<String>> entry : dataMap.entrySet()) {
+            List<String> correctedList = new ArrayList<>();
+
+            if (entry.getValue().size() >= 2) {
+                double num1 = Double.parseDouble(entry.getValue().get(1));
+                double num2 = Double.parseDouble(entry.getValue().get(3));
+                double result = num1 * num2;
+
+                DecimalFormat df = new DecimalFormat("#.##");
+                String formattedResult = df.format(result);
+
+                formattedResult = formattedResult.replace(",", ".");
+
+                correctedList.addAll(entry.getValue());
+                correctedList.add(formattedResult);
+
+                correctedDataMap.put(entry.getKey(), correctedList);
+            }
+        }
+
+        return correctedDataMap;
     }
 }
