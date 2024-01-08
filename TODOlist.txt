@@ -1,5 +1,8 @@
 Add continents to the number of countries. (?)
 
-Made a DB connection and submitted all the data.
+Add inflation rate date + AVG from fuel price (starting from the first date in%) Monthly.
 
-Add inflation rate date + AVG from fuel price (starting from the first date in%) Monthly
+Wrorking on DB conenction:
+    - Adding method to check for empty values and a functionality to copy closest existing
+    - Add functionality to check if date exist in DB (starting from most recent) and stops creating query. 
+
