@@ -12,7 +12,7 @@ import project.analysis.DataRunner;
 
 public class DBConnection {
     public static void main(String[] args) {
-        String url = "jdbc:postgresql://localhost:5432/OilApplication";
+        String url = "jdbc:postgresql://localhost:5432/OilAplication";
         String user = "postgres";
         String password = "superuser";
 
