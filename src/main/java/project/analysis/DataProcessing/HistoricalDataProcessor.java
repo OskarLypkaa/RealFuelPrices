@@ -38,10 +38,6 @@ public class HistoricalDataProcessor extends DataProcessor {
         return resultMap;
     }
 
-    public Map<String, List<String>> processCurrentData(List<Map<String, List<String>>> historicalResultList) {
-        return null;
-    }
-
     private Map<String, List<String>> fillMapWithMissingDates(Map<String, List<String>> dataMap) {
         Map<String, List<String>> result = new LinkedHashMap<>(dataMap);
 

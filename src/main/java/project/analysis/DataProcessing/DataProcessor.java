@@ -8,11 +8,6 @@ import java.util.Map;
 
 public abstract class DataProcessor {
 
-    public abstract Map<String, List<String>> processHistoricalData(
-            List<Map<String, List<String>>> historicalResultList);
-
-    public abstract Map<String, List<String>> processCurrentData(List<Map<String, List<String>>> currentResultList);
-
     protected Map<String, List<String>> mergeMaps(List<Map<String, List<String>>> maps) {
         Map<String, List<String>> mergedMap = new LinkedHashMap<>();
 
@@ -30,5 +25,20 @@ public abstract class DataProcessor {
         }
 
         return mergedMap;
+    }
+
+    public Map<String, List<String>> processInflationData(List<Map<String, List<String>>> inflationRateResultList) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'processInflationData'");
+    }
+
+    public Map<String, List<String>> processHistoricalData(List<Map<String, List<String>>> historicalResultList) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'processHistoricalData'");
+    }
+
+    public Map<String, List<String>> processCurrentData(List<Map<String, List<String>>> currentResultList) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'processCurrentData'");
     }
 }

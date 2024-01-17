@@ -43,7 +43,4 @@ public class CurrentDataProcessor extends DataProcessor {
         return resultMap;
     }
 
-    public Map<String, List<String>> processHistoricalData(List<Map<String, List<String>>> historicalResultList) {
-        return null;
-    }
 }
