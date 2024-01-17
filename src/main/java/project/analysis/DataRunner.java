@@ -16,9 +16,11 @@ import project.Exceptions.WSDataException;
 import project.Selenium.WebScraper;
 import project.Selenium.Screpers.NumbeoWebScraper;
 import project.Selenium.Screpers.OrlenWebScraper;
+import project.Selenium.Screpers.StooqWebScrapper;
 import project.analysis.DataProcessing.CurrentDataProcessor;
 import project.analysis.DataProcessing.DataProcessor;
 import project.analysis.DataProcessing.HistoricalDataProcessor;
+import project.analysis.DataProcessing.InflationRateDataProcessor;
 
 public class DataRunner {
 
@@ -30,12 +32,14 @@ public class DataRunner {
         private static final String DISEL = "Olej Napędowy Ekodiesel";
         private static final String AVERAGE_INCOME = "https://www.numbeo.com/cost-of-living/prices_by_country.jsp?displayCurrency=USD&itemId=105";
         private static final String FUEL_PRICE = "https://www.numbeo.com/cost-of-living/prices_by_country.jsp?displayCurrency=USD&itemId=24";
+        private static final String INFLATION_RATE = "https://stooq.pl/q/d/?s=cpiypl.m";
 
         // Create instances of API clients
         private static final ApiClient currencyApi = new CurrencyExchangeApiClient();
         private static final ApiClient oilApi = new OilPriceApiClient();
         private static final WebScraper orlenWebScraper = new OrlenWebScraper();
         private static final WebScraper numbeoWebScraper = new NumbeoWebScraper();
+        private static final WebScraper StooqWebScraper = new StooqWebScrapper();
 
         private static Map<String, String> tasksStatusMap = new LinkedHashMap<>();
 
@@ -44,9 +48,11 @@ public class DataRunner {
                 List<Map<String, List<String>>> finalResultList = new LinkedList<Map<String, List<String>>>();
                 List<Map<String, List<String>>> historicalResultList = new LinkedList<Map<String, List<String>>>();
                 List<Map<String, List<String>>> currentResultList = new LinkedList<Map<String, List<String>>>();
+                List<Map<String, List<String>>> inflationRateResultList = new LinkedList<Map<String, List<String>>>();
 
                 DataProcessor currentDataProcessor = new CurrentDataProcessor();
                 DataProcessor historicalDataProcessor = new HistoricalDataProcessor();
+                DataProcessor inflationRateDataProcessor = new InflationRateDataProcessor();
 
                 // Initialize asynchronous tasks
                 CompletableFuture<Map<String, List<String>>> task1 = CompletableFuture
@@ -66,15 +72,21 @@ public class DataRunner {
                                                 "Task 7"));
                 CompletableFuture<Map<String, List<String>>> task8 = CompletableFuture
                                 .supplyAsync(() -> executeTask(() -> fetchDataForCurrentPrices(FUEL_PRICE), "Task 8"));
+                CompletableFuture<Map<String, List<String>>> task9 = CompletableFuture
+                                .supplyAsync(() -> executeTask(() -> fetchDataForInflationRate(INFLATION_RATE),
+                                                "Task 9"));
 
                 List<CompletableFuture<Map<String, List<String>>>> allTasks = List.of(
-                                task1, task2, task3, task4, task5, task6, task7, task8);
+                                task1, task2, task3, task4, task5, task6, task7, task8, task9);
 
                 List<CompletableFuture<Map<String, List<String>>>> historicalDataTasks = List.of(
                                 task1, task2, task3, task4, task5, task6);
 
                 List<CompletableFuture<Map<String, List<String>>>> currentDataTasks = List.of(
                                 task7, task8);
+
+                List<CompletableFuture<Map<String, List<String>>>> inflationRateDataTasks = List.of(
+                                task4, task9);
 
                 CompletableFuture<Void> allOf = CompletableFuture
                                 .allOf(allTasks.toArray(new CompletableFuture[0]));
@@ -102,8 +114,19 @@ public class DataRunner {
                         }
                 }
 
+                for (int i = 0; i < currentDataTasks.size(); i++) {
+                        CompletableFuture<Map<String, List<String>>> task = inflationRateDataTasks.get(i);
+                        try {
+                                Map<String, List<String>> result = task.get();
+                                inflationRateResultList.add(result);
+                        } catch (InterruptedException | ExecutionException e) {
+                                e.printStackTrace();
+                        }
+                }
+
                 finalResultList.add(currentDataProcessor.processCurrentData(currentResultList));
                 finalResultList.add(historicalDataProcessor.processHistoricalData(historicalResultList));
+                finalResultList.add(inflationRateDataProcessor.processInflationData(inflationRateResultList));
 
                 printTasksStatus();
 
@@ -125,6 +148,10 @@ public class DataRunner {
 
         private static Map<String, List<String>> fetchDataForCurrentPrices(String dataSource) throws WSDataException {
                 return numbeoWebScraper.fetchData(dataSource);
+        }
+
+        private static Map<String, List<String>> fetchDataForInflationRate(String dataSource) throws WSDataException {
+                return StooqWebScraper.fetchData(dataSource);
         }
 
         private static <T> T executeTask(TaskSupplier<T> taskSupplier, String taskName) {
